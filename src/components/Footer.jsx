@@ -55,6 +55,10 @@ export default function Footer() {
               <p style={{ fontSize: '0.75rem', color: '#556fa0', margin: 0 }}>
                 &copy; {year} Instituto Federal de Santa Catarina (IFSC). Todos os direitos reservados.
               </p>
+              <p style={{ fontSize: '0.75rem', margin: '6px 0 0' }}>
+                <a href="/privacidade.html" target="_blank" rel="noopener noreferrer" style={{ color: '#7fa8e8', marginRight: 12 }}>Política de Privacidade</a>
+                <a href="/termos.html" target="_blank" rel="noopener noreferrer" style={{ color: '#7fa8e8' }}>Termos de Serviço</a>
+              </p>
             </div>
           </div>
         </div>

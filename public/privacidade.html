@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Política de Privacidade — SGRSC / IFSC</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f4f7fb;
+      color: #1a2a3a;
+      line-height: 1.7;
+    }
+    header {
+      background: linear-gradient(160deg, #072d60 0%, #0B3A75 60%, #0d4085 100%);
+      border-bottom: 4px solid #1C7C3B;
+      padding: 20px 0;
+    }
+    .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+    header .container { display: flex; align-items: center; gap: 16px; }
+    header img { height: 44px; filter: brightness(0) invert(1); }
+    header .title { color: #fff; }
+    header .title h1 { font-size: 1.1rem; font-weight: 700; }
+    header .title p { font-size: 0.78rem; color: #a8c4f0; margin-top: 2px; }
+    .badge {
+      margin-left: auto;
+      background: rgba(28,124,59,0.22);
+      border: 1px solid rgba(28,124,59,0.55);
+      color: #7ee8a2;
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .content { max-width: 860px; margin: 40px auto; padding: 0 24px 60px; }
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 16px rgba(11,58,117,0.09);
+      padding: 40px 44px;
+      margin-bottom: 24px;
+    }
+    .card-header-block {
+      border-bottom: 2px solid #e8edf5;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+    }
+    .card-header-block h2 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #0B3A75;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .card-header-block .meta {
+      font-size: 0.8rem;
+      color: #8a9ab5;
+      margin-top: 6px;
+    }
+    .tag {
+      display: inline-block;
+      background: #eef4ff;
+      color: #1351b4;
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    h3 {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: #0B3A75;
+      margin: 28px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h3 i { color: #1351b4; font-size: 0.92rem; }
+    p { margin-bottom: 12px; font-size: 0.93rem; color: #2c3e50; }
+    ul, ol { margin: 8px 0 14px 22px; }
+    li { font-size: 0.93rem; color: #2c3e50; margin-bottom: 5px; }
+    .highlight {
+      background: #f0f7ff;
+      border-left: 4px solid #1351b4;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+    .highlight strong { color: #0B3A75; }
+    .warning {
+      background: #fffbea;
+      border-left: 4px solid #d4a017;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+    .success-box {
+      background: #f0faf4;
+      border: 1.5px solid #1C7C3B;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .success-box i { color: #1C7C3B; margin-top: 2px; flex-shrink: 0; }
+    .success-box p { margin: 0; font-size: 0.9rem; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+    th { background: #0B3A75; color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; }
+    td { padding: 10px 14px; border-bottom: 1px solid #e8edf5; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) td { background: #f7f9fc; }
+    a { color: #1351b4; }
+    footer {
+      background: #071d4a;
+      color: #7fa8e8;
+      text-align: center;
+      padding: 20px 24px;
+      font-size: 0.78rem;
+    }
+    footer a { color: #aac4f5; }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #1351b4;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 24px;
+      padding: 8px 16px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    }
+    .back-link:hover { background: #eef4ff; }
+    @media (max-width: 600px) {
+      .card { padding: 24px 20px; }
+      .badge { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <img src="/logo-ifsc.png" alt="Logo IFSC" />
+    <div class="title">
+      <h1>SGRSC — Sistema de Geração de Memorial RSC</h1>
+      <p>Instituto Federal de Santa Catarina · CPPD</p>
+    </div>
+    <span class="badge"><i class="fas fa-shield-alt"></i> LGPD</span>
+  </div>
+</header>
+
+<div class="content">
+  <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Voltar ao sistema</a>
+
+  <div class="card">
+    <div class="card-header-block">
+      <h2><i class="fas fa-shield-alt" style="color:#1351b4"></i> Política de Privacidade</h2>
+      <div class="meta">
+        <span class="tag">LGPD — Lei nº 13.709/2018</span>
+        <span class="tag">Versão 1.0</span>
+        <span class="tag">Vigente desde junho de 2026</span>
+      </div>
+    </div>
+
+    <div class="success-box">
+      <i class="fas fa-lock"></i>
+      <p><strong>Privacidade por design:</strong> o SGRSC processa todos os dados localmente no seu navegador. Nenhuma informação pessoal, formulário ou arquivo anexado é transmitido a servidores externos, exceto os dados mínimos de autenticação gerenciados pelo Google (nome, e-mail e foto de perfil), conforme descrito abaixo.</p>
+    </div>
+
+    <h3><i class="fas fa-building"></i> 1. Identificação do Controlador</h3>
+    <p>O controlador dos dados pessoais tratados por este sistema é o <strong>Instituto Federal de Educação, Ciência e Tecnologia de Santa Catarina (IFSC)</strong>, CNPJ 11.402.907/0001-25, por meio da <strong>Comissão Permanente de Pessoal Docente (CPPD)</strong>.</p>
+    <ul>
+      <li><strong>Endereço:</strong> Rua 14 de Julho, 150, Coqueiros — Florianópolis/SC, CEP 88075-010</li>
+      <li><strong>Site:</strong> <a href="https://www.ifsc.edu.br" target="_blank">www.ifsc.edu.br</a></li>
+      <li><strong>Encarregado de Dados (DPO):</strong> consulte a página <a href="https://www.ifsc.edu.br/lgpd" target="_blank">ifsc.edu.br/lgpd</a></li>
+    </ul>
+
+    <h3><i class="fas fa-database"></i> 2. Dados Pessoais Tratados</h3>
+    <table>
+      <thead>
+        <tr><th>Categoria</th><th>Dados coletados</th><th>Origem</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Autenticação</strong></td>
+          <td>Nome completo, endereço de e-mail, foto de perfil</td>
+          <td>Conta Google (via Firebase Authentication)</td>
+        </tr>
+        <tr>
+          <td><strong>Identificação funcional</strong></td>
+          <td>Nome, SIAPE, nível pretendido, e-mail institucional, celular, cidade</td>
+          <td>Digitado pelo próprio servidor</td>
+        </tr>
+        <tr>
+          <td><strong>Dados do memorial</strong></td>
+          <td>Texto do memorial descritivo, comprovantes (datas, descrições, quantidades), dados do declarante</td>
+          <td>Digitado pelo próprio servidor</td>
+        </tr>
+        <tr>
+          <td><strong>Arquivos</strong></td>
+          <td>PDFs e imagens anexados como documentos comprobatórios</td>
+          <td>Upload pelo próprio servidor</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3><i class="fas fa-bullseye"></i> 3. Finalidade do Tratamento</h3>
+    <p>Os dados são tratados exclusivamente para:</p>
+    <ul>
+      <li>Identificar o usuário e isolar seus dados dos demais usuários do sistema;</li>
+      <li>Gerar o <strong>Memorial de RSC</strong> (Reconhecimento de Saberes e Competências) em formato PDF;</li>
+      <li>Gerar a <strong>planilha de avaliação</strong> em formato XLSX conforme o Anexo III da Resolução Consup nº 29/2014;</li>
+      <li>Salvar o progresso do preenchimento localmente no navegador do servidor.</li>
+    </ul>
+
+    <h3><i class="fas fa-balance-scale"></i> 4. Base Legal</h3>
+    <p>O tratamento de dados fundamenta-se nos seguintes incisos do art. 7º da LGPD:</p>
+    <ul>
+      <li><strong>Inciso II</strong> — Cumprimento de obrigação legal ou regulatória pelo controlador (processo de progressão funcional de servidor público federal);</li>
+      <li><strong>Inciso III</strong> — Execução de políticas públicas previstas em leis e regulamentos (Resolução Consup IFSC nº 29/2014 e suas retificações);</li>
+      <li><strong>Inciso I</strong> — Consentimento do titular, para os dados de autenticação via Google.</li>
+    </ul>
+
+    <h3><i class="fas fa-server"></i> 5. Armazenamento e Segurança</h3>
+    <div class="highlight">
+      <strong>Armazenamento local:</strong> todos os dados do formulário e arquivos anexados são armazenados exclusivamente no <strong>IndexedDB do seu navegador</strong> (armazenamento local do dispositivo). O IFSC não possui acesso a esses dados, que só existem no navegador utilizado pelo servidor.
+    </div>
+    <p><strong>Autenticação Google/Firebase:</strong> os dados de login (nome, e-mail, foto) são gerenciados pelo serviço Firebase Authentication (Google LLC), sujeito à <a href="https://firebase.google.com/support/privacy" target="_blank">Política de Privacidade do Firebase</a> e à <a href="https://policies.google.com/privacy" target="_blank">Política de Privacidade do Google</a>. O IFSC recebe apenas o identificador único do usuário para indexar os dados no dispositivo.</p>
+    <p>Adotamos as seguintes medidas de segurança:</p>
+    <ul>
+      <li>Comunicação com Firebase via HTTPS/TLS;</li>
+      <li>Dados do memorial processados inteiramente no lado do cliente (sem tráfego de rede);</li>
+      <li>Isolamento de dados por conta Google (UID único por usuário).</li>
+    </ul>
+
+    <h3><i class="fas fa-clock"></i> 6. Retenção dos Dados</h3>
+    <p>Os dados armazenados no IndexedDB permanecem no dispositivo até que o próprio servidor os exclua (função "Limpar tudo" no menu do usuário) ou limpe os dados do navegador. O IFSC não controla esse prazo.</p>
+    <p>Os dados de autenticação no Firebase são retidos conforme a política do Google, podendo ser excluídos mediante solicitação ao DPO do IFSC ou diretamente na conta Google do titular.</p>
+
+    <h3><i class="fas fa-share-alt"></i> 7. Compartilhamento de Dados</h3>
+    <div class="warning">
+      <strong>O SGRSC não compartilha dados pessoais com terceiros.</strong> Os documentos gerados (PDF e XLSX) são produzidos localmente e baixados pelo servidor, que é responsável por seu envio ao processo formal de RSC.
+    </div>
+    <p>Os únicos dados que trafegam externamente são os de autenticação, tratados pelo Google conforme suas próprias políticas.</p>
+
+    <h3><i class="fas fa-user-shield"></i> 8. Direitos do Titular</h3>
+    <p>Nos termos dos arts. 17 a 22 da LGPD, o titular tem direito a:</p>
+    <ul>
+      <li><strong>Confirmação e acesso</strong> — saber quais dados são tratados;</li>
+      <li><strong>Correção</strong> — atualizar dados incompletos ou inexatos;</li>
+      <li><strong>Eliminação</strong> — excluir dados desnecessários ou tratados sem consentimento;</li>
+      <li><strong>Portabilidade</strong> — exportar os dados via função "Exportar JSON";</li>
+      <li><strong>Revogação do consentimento</strong> — desconectar a conta Google a qualquer momento;</li>
+      <li><strong>Oposição</strong> — opor-se ao tratamento em desconformidade com a LGPD.</li>
+    </ul>
+    <p>Para exercer esses direitos, entre em contato com o DPO do IFSC em <a href="https://www.ifsc.edu.br/lgpd" target="_blank">ifsc.edu.br/lgpd</a>.</p>
+
+    <h3><i class="fas fa-cookie-bite"></i> 9. Cookies e Tecnologias Similares</h3>
+    <p>O SGRSC utiliza o <strong>IndexedDB</strong> (banco de dados local do navegador) para persistência de sessão e dados. Não utilizamos cookies de rastreamento, analytics ou publicidade. O Firebase pode utilizar cookies técnicos para manutenção da sessão de autenticação.</p>
+
+    <h3><i class="fas fa-child"></i> 10. Menores de Idade</h3>
+    <p>Este sistema destina-se exclusivamente a servidores públicos federais do IFSC. Não coletamos intencionalmente dados de menores de 18 anos.</p>
+
+    <h3><i class="fas fa-edit"></i> 11. Alterações nesta Política</h3>
+    <p>Esta política pode ser atualizada periodicamente. Alterações relevantes serão comunicadas por meio do próprio sistema. A versão vigente sempre estará disponível nesta página.</p>
+
+    <h3><i class="fas fa-envelope"></i> 12. Contato</h3>
+    <p>Dúvidas sobre esta política ou sobre o tratamento de dados:</p>
+    <ul>
+      <li><strong>CPPD/IFSC:</strong> <a href="mailto:cppd@ifsc.edu.br">cppd@ifsc.edu.br</a></li>
+      <li><strong>DPO/IFSC:</strong> <a href="https://www.ifsc.edu.br/lgpd" target="_blank">ifsc.edu.br/lgpd</a></li>
+      <li><strong>ANPD:</strong> <a href="https://www.gov.br/anpd" target="_blank">gov.br/anpd</a></li>
+    </ul>
+
+    <div style="margin-top:32px;padding-top:20px;border-top:1px solid #e8edf5;font-size:0.8rem;color:#8a9ab5;">
+      Última atualização: junho de 2026 · Versão 1.0 · Em conformidade com a Lei nº 13.709/2018 (LGPD)
+    </div>
+  </div>
+</div>
+
+<footer>
+  &copy; 2026 Instituto Federal de Santa Catarina (IFSC) ·
+  <a href="/termos.html">Termos de Serviço</a> ·
+  <a href="/">Voltar ao sistema</a>
+</footer>
+
+</body>
+</html>

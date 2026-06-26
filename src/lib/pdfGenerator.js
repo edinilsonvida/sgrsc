@@ -1,4 +1,5 @@
 import { getCriterio, calcular } from './engine';
+import { pluralUnidade } from './pluralUnidade';
 
 const azulIFSC  = [11, 58, 117];
 const verdeIFSC = [28, 124, 59];
@@ -306,7 +307,7 @@ export async function generatePdf(items, dados, onProgress) {
   const drawItemCard = (d, y, rowNum, item, crit) => {
     const qty     = item.quantidade || '0';
     const pts     = (parseFloat(qty) * crit.fator).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const qtyStr  = `${qty} ${crit.unidade.toLowerCase()}(s)`;
+    const qtyStr  = `${qty} ${pluralUnidade(crit.unidade, qty)}`;
     const dateStr = item.data ? item.data.split('-').reverse().join('/') : '—';
     const hasObs  = !!item.observacao?.trim();
 

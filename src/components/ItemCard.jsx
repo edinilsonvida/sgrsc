@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import flatpickr from 'flatpickr';
 import { Portuguese } from 'flatpickr/dist/l10n/pt.js';
 import { getCriterio, calcularPontosItem, getQuantidadeMaxima } from '../lib/engine';
+import { pluralUnidade } from '../lib/pluralUnidade';
 
 function isoToDisplay(iso) {
   if (!iso) return '';
@@ -151,7 +152,7 @@ export default function ItemCard({ item, index, onUpdate, onRemove, onDuplicate,
                 {errQtd && errMsg}
                 {crit && (
                   <div style={{ fontSize: '0.72rem', color: '#6b7f99', marginTop: 4 }}>
-                    Fator: {crit.fator.toLocaleString('pt-BR')} pontos/unidade | <strong>Limite: {crit.quantidadeMaxima} {crit.unidade}(s)</strong>
+                    Fator: {crit.fator.toLocaleString('pt-BR')} pontos/unidade | <strong>Limite: {crit.quantidadeMaxima} {pluralUnidade(crit.unidade, crit.quantidadeMaxima)}</strong>
                   </div>
                 )}
               </div>

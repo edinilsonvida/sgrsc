@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Termos de Serviço — SGRSC / IFSC</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f4f7fb;
+      color: #1a2a3a;
+      line-height: 1.7;
+    }
+    header {
+      background: linear-gradient(160deg, #072d60 0%, #0B3A75 60%, #0d4085 100%);
+      border-bottom: 4px solid #1C7C3B;
+      padding: 20px 0;
+    }
+    .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+    header .container { display: flex; align-items: center; gap: 16px; }
+    header img { height: 44px; filter: brightness(0) invert(1); }
+    header .title { color: #fff; }
+    header .title h1 { font-size: 1.1rem; font-weight: 700; }
+    header .title p { font-size: 0.78rem; color: #a8c4f0; margin-top: 2px; }
+    .badge {
+      margin-left: auto;
+      background: rgba(28,124,59,0.22);
+      border: 1px solid rgba(28,124,59,0.55);
+      color: #7ee8a2;
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .content { max-width: 860px; margin: 40px auto; padding: 0 24px 60px; }
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 16px rgba(11,58,117,0.09);
+      padding: 40px 44px;
+      margin-bottom: 24px;
+    }
+    .card-header-block {
+      border-bottom: 2px solid #e8edf5;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+    }
+    .card-header-block h2 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #0B3A75;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .card-header-block .meta {
+      font-size: 0.8rem;
+      color: #8a9ab5;
+      margin-top: 6px;
+    }
+    .tag {
+      display: inline-block;
+      background: #eef4ff;
+      color: #1351b4;
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    h3 {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: #0B3A75;
+      margin: 28px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h3 i { color: #1351b4; font-size: 0.92rem; }
+    p { margin-bottom: 12px; font-size: 0.93rem; color: #2c3e50; }
+    ul, ol { margin: 8px 0 14px 22px; }
+    li { font-size: 0.93rem; color: #2c3e50; margin-bottom: 5px; }
+    .highlight {
+      background: #f0f7ff;
+      border-left: 4px solid #1351b4;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+    .warning {
+      background: #fffbea;
+      border-left: 4px solid #d4a017;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+    .danger-box {
+      background: #fff5f5;
+      border: 1.5px solid #e53e3e;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .danger-box i { color: #e53e3e; margin-top: 2px; flex-shrink: 0; }
+    .danger-box p { margin: 0; font-size: 0.9rem; }
+    .success-box {
+      background: #f0faf4;
+      border: 1.5px solid #1C7C3B;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .success-box i { color: #1C7C3B; margin-top: 2px; flex-shrink: 0; }
+    .success-box p { margin: 0; font-size: 0.9rem; }
+    a { color: #1351b4; }
+    footer {
+      background: #071d4a;
+      color: #7fa8e8;
+      text-align: center;
+      padding: 20px 24px;
+      font-size: 0.78rem;
+    }
+    footer a { color: #aac4f5; }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #1351b4;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 24px;
+      padding: 8px 16px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    }
+    .back-link:hover { background: #eef4ff; }
+    .num { display: inline-block; background: #0B3A75; color: #fff; border-radius: 50%; width: 22px; height: 22px; font-size: 0.75rem; font-weight: 700; text-align: center; line-height: 22px; margin-right: 6px; flex-shrink: 0; }
+    @media (max-width: 600px) {
+      .card { padding: 24px 20px; }
+      .badge { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <img src="/logo-ifsc.png" alt="Logo IFSC" />
+    <div class="title">
+      <h1>SGRSC — Sistema de Geração de Memorial RSC</h1>
+      <p>Instituto Federal de Santa Catarina · CPPD</p>
+    </div>
+    <span class="badge"><i class="fas fa-file-contract"></i> Termos</span>
+  </div>
+</header>
+
+<div class="content">
+  <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Voltar ao sistema</a>
+
+  <div class="card">
+    <div class="card-header-block">
+      <h2><i class="fas fa-file-contract" style="color:#1351b4"></i> Termos de Serviço</h2>
+      <div class="meta">
+        <span class="tag">SGRSC v1.0</span>
+        <span class="tag">IFSC / CPPD</span>
+        <span class="tag">Vigente desde junho de 2026</span>
+      </div>
+    </div>
+
+    <p>Estes Termos de Serviço regulam o uso do <strong>Sistema de Geração de Memorial RSC (SGRSC)</strong>, ferramenta desenvolvida pelo Instituto Federal de Santa Catarina (IFSC) para apoio aos processos de Reconhecimento de Saberes e Competências (RSC). Ao utilizar o sistema, o usuário declara ter lido, compreendido e concordado com as condições abaixo.</p>
+
+    <h3><i class="fas fa-info-circle"></i> 1. Sobre o Sistema</h3>
+    <p>O SGRSC é uma ferramenta de apoio destinada exclusivamente a <strong>servidores docentes do IFSC</strong> que participam de processos de progressão funcional por RSC. O sistema permite:</p>
+    <ul>
+      <li>Preencher o formulário de identificação funcional;</li>
+      <li>Lançar e organizar comprovantes por critério de avaliação;</li>
+      <li>Calcular estimativa de pontuação com base nos critérios vigentes;</li>
+      <li>Gerar o memorial em formato PDF e a planilha de avaliação em XLSX;</li>
+      <li>Salvar o progresso localmente e exportar/importar dados em formato JSON.</li>
+    </ul>
+
+    <h3><i class="fas fa-user-check"></i> 2. Usuários Autorizados</h3>
+    <p>O uso do SGRSC é autorizado exclusivamente a:</p>
+    <ul>
+      <li>Servidores docentes do IFSC em atividade ou aposentados que participem de processos de RSC;</li>
+      <li>Servidores da CPPD e unidades de gestão de pessoas do IFSC, para fins de suporte.</li>
+    </ul>
+    <div class="danger-box">
+      <i class="fas fa-exclamation-triangle"></i>
+      <p>O uso do sistema por pessoas não autorizadas, com finalidade diversa da prevista nestes termos, ou de forma a prejudicar terceiros ou a instituição, é expressamente vedado e poderá acarretar responsabilização administrativa, civil e penal.</p>
+    </div>
+
+    <h3><i class="fas fa-exclamation-circle"></i> 3. Caráter Orientativo — Limitação Importante</h3>
+    <div class="warning">
+      <strong>Atenção:</strong> a pontuação calculada pelo SGRSC é <strong>estimada e de caráter exclusivamente orientativo</strong>. O cálculo oficial é realizado pela comissão avaliadora do IFSC por meio da planilha preenchida pela própria comissão, conforme o Anexo III da Resolução Consup nº 29/2014 e suas retificações.
+    </div>
+    <p>O IFSC não garante que a pontuação estimada pelo sistema corresponderá à pontuação oficial atribuída pela comissão avaliadora. Divergências podem ocorrer em razão de interpretações normativas, documentação adicional ou critérios específicos aplicados pela comissão.</p>
+
+    <h3><i class="fas fa-balance-scale-right"></i> 4. Responsabilidades do Usuário</h3>
+    <p>Ao utilizar o SGRSC, o servidor declara e se compromete a:</p>
+    <ol>
+      <li>Fornecer informações verídicas, completas e atualizadas;</li>
+      <li>Anexar apenas documentos legítimos e pertinentes ao processo de RSC;</li>
+      <li>Não utilizar o sistema para fraudar, adulterar ou falsificar documentos ou pontuações;</li>
+      <li>Zelar pela segurança do seu dispositivo e da conta Google utilizada para acesso;</li>
+      <li>Realizar backups periódicos dos dados por meio da função "Exportar JSON";</li>
+      <li>Não compartilhar credenciais de acesso com terceiros.</li>
+    </ol>
+
+    <h3><i class="fas fa-shield-alt"></i> 5. Responsabilidades do IFSC</h3>
+    <p>O IFSC compromete-se a:</p>
+    <ul>
+      <li>Manter o sistema disponível conforme suas capacidades técnicas e orçamentárias;</li>
+      <li>Atualizar os critérios e pontuações conforme as normas vigentes;</li>
+      <li>Tratar os dados de autenticação em conformidade com a LGPD;</li>
+      <li>Comunicar aos usuários alterações relevantes nos termos ou no sistema.</li>
+    </ul>
+
+    <h3><i class="fas fa-ban"></i> 6. Limitação de Responsabilidade</h3>
+    <p>O IFSC não se responsabiliza por:</p>
+    <ul>
+      <li>Perda de dados armazenados localmente no dispositivo do usuário (por falha de hardware, limpeza de cache do navegador, reinstalação do sistema operacional ou outros eventos);</li>
+      <li>Divergências entre a pontuação estimada pelo sistema e a pontuação oficial atribuída pela comissão avaliadora;</li>
+      <li>Indisponibilidade temporária do sistema por manutenção, falhas de infraestrutura ou força maior;</li>
+      <li>Uso indevido do sistema pelo próprio usuário ou por terceiros que tenham obtido acesso às suas credenciais;</li>
+      <li>Conteúdo, disponibilidade ou políticas de serviços de terceiros (Google/Firebase).</li>
+    </ul>
+
+    <div class="highlight">
+      <strong>Recomendação:</strong> realize exportações periódicas em JSON para garantir a continuidade do trabalho em caso de perda de dados locais. O IFSC não possui cópia dos dados do formulário.
+    </div>
+
+    <h3><i class="fas fa-gavel"></i> 7. Conformidade Legal</h3>
+    <p>O uso do SGRSC deve estar em conformidade com:</p>
+    <ul>
+      <li><strong>Lei nº 13.709/2018</strong> — Lei Geral de Proteção de Dados (LGPD);</li>
+      <li><strong>Lei nº 8.112/1990</strong> — Regime Jurídico dos Servidores Públicos Federais;</li>
+      <li><strong>Resolução Consup IFSC nº 29/2014</strong> e retificações (nº 13/2017 e nº 48/2018);</li>
+      <li><strong>Lei nº 11.892/2008</strong> — Institui a Rede Federal de Educação Profissional;</li>
+      <li>Demais normas aplicáveis ao serviço público federal.</li>
+    </ul>
+
+    <h3><i class="fas fa-copyright"></i> 8. Propriedade Intelectual</h3>
+    <p>O SGRSC, seu código-fonte, design e conteúdo são de propriedade do <strong>Instituto Federal de Santa Catarina (IFSC)</strong>. É vedada a reprodução, modificação ou distribuição do sistema sem autorização expressa da instituição.</p>
+    <p>Os documentos gerados (PDF e XLSX) pertencem ao servidor que os produziu e são de sua exclusiva responsabilidade quanto ao uso e envio nos processos administrativos.</p>
+
+    <h3><i class="fas fa-plug"></i> 9. Serviços de Terceiros</h3>
+    <p>O sistema utiliza o serviço <strong>Firebase Authentication</strong> (Google LLC) para autenticação. O uso desse serviço está sujeito aos <a href="https://firebase.google.com/terms" target="_blank">Termos de Serviço do Firebase</a> e à <a href="https://policies.google.com/privacy" target="_blank">Política de Privacidade do Google</a>. O IFSC não controla as práticas de privacidade do Google.</p>
+
+    <h3><i class="fas fa-power-off"></i> 10. Suspensão e Encerramento</h3>
+    <p>O IFSC reserva-se o direito de suspender ou encerrar o acesso ao sistema, sem aviso prévio, em caso de:</p>
+    <ul>
+      <li>Uso em desconformidade com estes termos;</li>
+      <li>Suspeita de fraude ou manipulação de dados;</li>
+      <li>Encerramento do sistema por decisão institucional.</li>
+    </ul>
+    <p>O usuário pode encerrar seu acesso a qualquer momento pela função "Sair" no menu do sistema.</p>
+
+    <h3><i class="fas fa-map-marker-alt"></i> 11. Foro e Lei Aplicável</h3>
+    <p>Estes termos são regidos pela legislação brasileira. Fica eleito o foro da <strong>Comarca de Florianópolis/SC</strong> para dirimir eventuais litígios decorrentes da utilização do sistema, sem prejuízo de outros meios legais cabíveis.</p>
+
+    <h3><i class="fas fa-edit"></i> 12. Alterações nos Termos</h3>
+    <p>O IFSC pode atualizar estes termos a qualquer momento. A versão vigente sempre estará disponível nesta página. O uso continuado do sistema após alterações constitui aceitação dos novos termos.</p>
+
+    <h3><i class="fas fa-envelope"></i> 13. Contato</h3>
+    <ul>
+      <li><strong>CPPD/IFSC:</strong> <a href="mailto:cppd@ifsc.edu.br">cppd@ifsc.edu.br</a></li>
+      <li><strong>Site institucional:</strong> <a href="https://www.ifsc.edu.br" target="_blank">www.ifsc.edu.br</a></li>
+    </ul>
+
+    <div style="margin-top:32px;padding-top:20px;border-top:1px solid #e8edf5;font-size:0.8rem;color:#8a9ab5;">
+      Última atualização: junho de 2026 · Versão 1.0 · SGRSC — Instituto Federal de Santa Catarina (IFSC)
+    </div>
+  </div>
+</div>
+
+<footer>
+  &copy; 2026 Instituto Federal de Santa Catarina (IFSC) ·
+  <a href="/privacidade.html">Política de Privacidade</a> ·
+  <a href="/">Voltar ao sistema</a>
+</footer>
+
+</body>
+</html>

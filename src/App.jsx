@@ -1,23 +1,27 @@
-import { useState, useRef, useCallback } from 'react';
-import Header           from './components/Header';
-import Footer           from './components/Footer';
-import LibErrorBanner   from './components/LibErrorBanner';
-import AlertBanner      from './components/AlertBanner';
-import HowToUse         from './components/HowToUse';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import Header             from './components/Header';
+import Footer             from './components/Footer';
+import LibErrorBanner     from './components/LibErrorBanner';
+import AlertBanner        from './components/AlertBanner';
+import HowToUse          from './components/HowToUse';
 import IdentificationForm from './components/IdentificationForm';
-import ItemAdder        from './components/ItemAdder';
-import ItemList         from './components/ItemList';
-import ScorePanel       from './components/ScorePanel';
-import Toast            from './components/Toast';
-import MessageModal     from './components/MessageModal';
-import { getCriterio }  from './lib/engine';
-import { generatePdf }  from './lib/pdfGenerator';
-import { generateExcel } from './lib/excelGenerator';
+import ItemAdder          from './components/ItemAdder';
+import ItemList           from './components/ItemList';
+import ScorePanel         from './components/ScorePanel';
+import Toast              from './components/Toast';
+import MessageModal       from './components/MessageModal';
+import LoginPage          from './components/LoginPage';
+import { getCriterio }    from './lib/engine';
+import { generatePdf }    from './lib/pdfGenerator';
+import { generateExcel }  from './lib/excelGenerator';
+import { saveToIDB, loadFromIDB, clearFromIDB } from './lib/db';
+import { exportToJson, importFromJson }          from './lib/storage';
+import { useAuth }        from './contexts/AuthContext';
 
 const DADOS_INICIAL = {
   nome: '', siape: '', nivelPretendido: '', email: '', celular: '',
   rt: 'Nenhuma', portariaRt: '', dataRt: '', dataLimite: '',
-  memorialTexto: '', declaranteNome: '', declaranteSiape: '', cidade: ''
+  memorialTexto: '', declaranteNome: '', declaranteSiape: '', cidade: '',
 };
 
 function sortItems(items) {
@@ -27,22 +31,22 @@ function sortItems(items) {
     if (dA !== dB) return dB - dA;
     const cA = getCriterio(a.codigo);
     const cB = getCriterio(b.codigo);
-    const sA = cA ? `${cA.nivel}-${cA.diretriz}-${String(cA.codigo).padStart(3,'0')}` : 'ZZZ';
-    const sB = cB ? `${cB.nivel}-${cB.diretriz}-${String(cB.codigo).padStart(3,'0')}` : 'ZZZ';
+    const sA = cA ? `${cA.nivel}-${cA.diretriz}-${String(cA.codigo).padStart(3, '0')}` : 'ZZZ';
+    const sB = cB ? `${cB.nivel}-${cB.diretriz}-${String(cB.codigo).padStart(3, '0')}` : 'ZZZ';
     return sA.localeCompare(sB);
   });
 }
 
 export default function App() {
-  const [dados, setDados]   = useState(DADOS_INICIAL);
-  const [items, setItems]   = useState([]);
-  const [nextId, setNextId] = useState(1);
-  const [generating, setGenerating]   = useState(false);
-  const [mostrarErros, setMostrarErros] = useState(false);
-  const [pageMetas, setPageMetas]     = useState(null);
+  const { user } = useAuth();
 
-  const CAMPOS_OBRIGATORIOS = ['nome', 'siape', 'nivelPretendido', 'email', 'celular', 'dataLimite'];
-  const dadosValidos = () => CAMPOS_OBRIGATORIOS.every(f => dados[f]?.trim?.() || dados[f]);
+  const [dados,        setDados]        = useState(DADOS_INICIAL);
+  const [items,        setItems]        = useState([]);
+  const [nextId,       setNextId]       = useState(1);
+  const [generating,   setGenerating]   = useState(false);
+  const [mostrarErros, setMostrarErros] = useState(false);
+  const [pageMetas,    setPageMetas]    = useState(null);
+  const [dataLoaded,   setDataLoaded]   = useState(false);
 
   const toastRef = useRef(null);
   const msgRef   = useRef(null);
@@ -56,6 +60,40 @@ export default function App() {
   }, []);
 
   const showMsg = useCallback((msg, confirm = false) => msgRef.current?.show(msg, confirm), []);
+
+  // Carrega dados do IndexedDB ao fazer login
+  useEffect(() => {
+    if (!user) {
+      setDados(DADOS_INICIAL);
+      setItems([]);
+      setNextId(1);
+      setDataLoaded(false);
+      setPageMetas(null);
+      return;
+    }
+    loadFromIDB(user.uid)
+      .then(saved => {
+        if (saved) {
+          setDados(saved.dados);
+          setItems(saved.items);
+          setNextId(saved.items.reduce((max, i) => Math.max(max, i.id), 0) + 1);
+        }
+        setDataLoaded(true);
+      })
+      .catch(() => setDataLoaded(true));
+  }, [user]);
+
+  // Auto-save no IndexedDB com debounce
+  useEffect(() => {
+    if (!user || !dataLoaded) return;
+    const timer = setTimeout(() => {
+      saveToIDB(user.uid, dados, items).catch(console.error);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [dados, items, user, dataLoaded]);
+
+  const CAMPOS_OBRIGATORIOS = ['nome', 'siape', 'nivelPretendido', 'email', 'celular', 'dataLimite'];
+  const dadosValidos = () => CAMPOS_OBRIGATORIOS.every(f => dados[f]?.trim?.() || dados[f]);
 
   const handleDadosChange = (field, value) => setDados(prev => ({ ...prev, [field]: value }));
 
@@ -85,9 +123,9 @@ export default function App() {
       if (!src) return prev;
       const newId = nextId;
       setNextId(n => n + 1);
-      const copy = { ...src, id: newId, files: [...src.files], isOpen: true };
+      const copy   = { ...src, id: newId, files: [...src.files], isOpen: true };
       const closed = prev.map(i => ({ ...i, isOpen: false }));
-      const idx = closed.findIndex(i => i.id === id);
+      const idx    = closed.findIndex(i => i.id === id);
       closed.splice(idx + 1, 0, copy);
       return closed;
     });
@@ -121,9 +159,7 @@ export default function App() {
       showMsg('Adicione pelo menos um comprovante antes de gerar.');
       return false;
     }
-    const semCampos = items.filter(i =>
-      !i.docDescricao?.trim() || !i.data || !i.quantidade || parseFloat(i.quantidade) <= 0
-    );
+    const semCampos = items.filter(i => !i.docDescricao?.trim() || !i.data || !i.quantidade || parseFloat(i.quantidade) <= 0);
     if (semCampos.length > 0) {
       setMostrarErros(true);
       showMsg(`${semCampos.length} item(ns) com campos obrigatórios não preenchidos (Descrição, Data ou Quantidade).`);
@@ -142,8 +178,7 @@ export default function App() {
     if (!validarAntes()) return;
     setGenerating(true);
     try {
-      const sorted = sortItems(items);
-      await generateExcel(sorted, dados, pageMetas);
+      await generateExcel(sortItems(items), dados, pageMetas);
       showToast('Formulário de avaliação XLSX gerado com sucesso!');
     } catch (err) {
       showMsg(err.message || 'Erro ao gerar planilha.');
@@ -157,8 +192,7 @@ export default function App() {
     if (!validarAntes()) return;
     setGenerating(true);
     try {
-      const sorted = sortItems(items);
-      const metas = await generatePdf(sorted, dados, msg => showToast(msg));
+      const metas = await generatePdf(sortItems(items), dados, msg => showToast(msg));
       if (metas) setPageMetas(metas);
       showToast('Arquivo PDF unificado gerado com sucesso!');
     } catch (err) {
@@ -168,10 +202,57 @@ export default function App() {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      await exportToJson(dados, items);
+      showToast('JSON exportado com sucesso!');
+    } catch (err) {
+      showMsg('Erro ao exportar: ' + (err.message || 'tente novamente.'));
+    }
+  };
+
+  const handleImport = async file => {
+    try {
+      const { dados: d, items: i } = await importFromJson(file);
+      setDados(d);
+      setItems(i);
+      setNextId(i.reduce((max, item) => Math.max(max, item.id), 0) + 1);
+      setMostrarErros(false);
+      setPageMetas(null);
+      showToast('Dados importados! Você pode editar e gerar os documentos.');
+    } catch (err) {
+      showMsg('Erro ao importar: ' + (err.message || 'arquivo inválido.'));
+    }
+  };
+
+  const handleClear = async () => {
+    const ok = await showMsg('Tem certeza que deseja limpar todos os dados? Esta ação não pode ser desfeita.', true);
+    if (!ok) return;
+    setDados(DADOS_INICIAL);
+    setItems([]);
+    setNextId(1);
+    setMostrarErros(false);
+    setPageMetas(null);
+    if (user) clearFromIDB(user.uid).catch(console.error);
+    showToast('Dados limpos com sucesso.');
+  };
+
+  // Tela de loading enquanto verifica autenticação
+  if (user === undefined) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f4fb' }}>
+        <i className="fas fa-spinner fa-spin" style={{ fontSize: 32, color: '#1351b4' }} />
+      </div>
+    );
+  }
+
+  // Tela de login
+  if (user === null) return <LoginPage />;
+
   return (
     <>
       <LibErrorBanner />
-      <Header />
+      <Header onExport={handleExport} onImport={handleImport} onClear={handleClear} />
 
       <div className="container-lg mb-5 mt-4">
         <AlertBanner />

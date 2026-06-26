@@ -1,10 +1,12 @@
-export default function Header() {
+import UserMenu from './UserMenu';
+
+export default function Header({ onExport, onImport, onClear }) {
   return (
     <header style={{
       background: 'linear-gradient(160deg, #072d60 0%, #0B3A75 55%, #0d4085 100%)',
       borderBottom: '4px solid #1C7C3B',
       boxShadow: '0 4px 24px rgba(0,0,0,0.28)',
-      position: 'relative'
+      position: 'relative',
     }}>
       <div className="container-lg">
         <div className="d-flex align-items-center flex-wrap py-3" style={{ gap: '0 16px', minHeight: 72 }}>
@@ -26,10 +28,11 @@ export default function Header() {
             </div>
           </div>
 
-          <div className="d-none d-md-flex align-items-center" style={{ gap: 8, flexShrink: 0 }}>
-            <span style={{ background: 'rgba(28,124,59,0.22)', border: '1px solid rgba(28,124,59,0.55)', color: '#7ee8a2', borderRadius: 20, padding: '5px 15px', fontSize: '0.78rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
+          <div className="d-flex align-items-center" style={{ gap: 10, flexShrink: 0 }}>
+            <span className="d-none d-md-inline-flex" style={{ background: 'rgba(28,124,59,0.22)', border: '1px solid rgba(28,124,59,0.55)', color: '#7ee8a2', borderRadius: 20, padding: '5px 15px', fontSize: '0.78rem', fontWeight: 600, whiteSpace: 'nowrap', alignItems: 'center', gap: 4 }}>
               <i className="fas fa-university mr-1" /> IFSC &nbsp;·&nbsp; CPPD
             </span>
+            <UserMenu onExport={onExport} onImport={onImport} onClear={onClear} />
           </div>
         </div>
       </div>
