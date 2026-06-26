@@ -11,7 +11,7 @@ import ScorePanel         from './components/ScorePanel';
 import Toast              from './components/Toast';
 import MessageModal       from './components/MessageModal';
 import LoginPage          from './components/LoginPage';
-import { getCriterio }    from './lib/engine';
+import { getCriterio, calcular } from './lib/engine';
 import { generatePdf }    from './lib/pdfGenerator';
 import { generateExcel }  from './lib/excelGenerator';
 import { saveToIDB, loadFromIDB, clearFromIDB } from './lib/db';
@@ -175,6 +175,14 @@ export default function App() {
     const semAnexo = items.filter(i => !i.files || i.files.length === 0);
     if (semAnexo.length > 0) {
       showMsg(`${semAnexo.length} item(ns) sem documento anexado. Todos os comprovantes devem ter pelo menos um arquivo anexado.`);
+      return false;
+    }
+    const { c1ok, c2ok, totalGeral, pontosPretendido } = calcular(items, dados.nivelPretendido);
+    if (!c1ok || !c2ok) {
+      const falhas = [];
+      if (!c1ok) falhas.push(`Critério 1 não atendido: total geral de ${(totalGeral ?? 0).toFixed(2)} pontos (mínimo: 50 pontos).`);
+      if (!c2ok) falhas.push(`Critério 2 não atendido: ${dados.nivelPretendido || 'nível pretendido'} com ${(pontosPretendido ?? 0).toFixed(2)} pontos (mínimo: 25 pontos).`);
+      showMsg(`Pontuação insuficiente — o documento não pode ser gerado:\n\n${falhas.join('\n')}`);
       return false;
     }
     return true;
