@@ -768,29 +768,54 @@ export async function generateExcel(items, dados, pageMetas) {
 async function injectLogoIntoXlsx(xlsxBuffer) {
   if (!window.JSZip) return xlsxBuffer;
 
-  let logoBytes;
+  // Load logo, convert all opaque pixels to white (same technique as pdfGenerator)
+  let logoPngBytes, natW, natH;
   try {
-    const resp = await fetch('/logo-ifsc.png');
-    if (!resp.ok) return xlsxBuffer;
-    logoBytes = await resp.arrayBuffer();
+    await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        natW = img.naturalWidth  || 400;
+        natH = img.naturalHeight || 150;
+        const cv = document.createElement('canvas');
+        cv.width = natW * 2; cv.height = natH * 2;
+        const ctx = cv.getContext('2d');
+        ctx.drawImage(img, 0, 0, cv.width, cv.height);
+        const d = ctx.getImageData(0, 0, cv.width, cv.height);
+        for (let i = 0; i < d.data.length; i += 4) {
+          if (d.data[i + 3] > 10) { d.data[i] = d.data[i + 1] = d.data[i + 2] = 255; }
+        }
+        ctx.putImageData(d, 0, 0);
+        cv.toBlob(
+          blob => blob.arrayBuffer().then(buf => { logoPngBytes = buf; resolve(); }).catch(reject),
+          'image/png'
+        );
+      };
+      img.onerror = reject;
+      img.src = '/logo-ifsc.png';
+    });
   } catch {
     return xlsxBuffer;
   }
 
   const zip = await window.JSZip.loadAsync(xlsxBuffer);
 
-  // 1. Image file
-  zip.file('xl/media/logo.png', logoBytes);
+  // 1. White logo PNG
+  zip.file('xl/media/logo.png', logoPngBytes);
 
-  // 2. Drawing XML — twoCellAnchor spanning A1:C1 (cols 0-2, row 0)
+  // 2. Drawing XML — absoluteAnchor sized to preserve the logo's natural aspect ratio
+  //    Row 0 height = 46pt (set in ws['!rows']); 1pt = 12700 EMU
+  const MARGIN   = 70000;                       // ~5.5pt padding on all sides
+  const imgH     = 46 * 12700 - MARGIN * 2;    // 444200 EMU
+  const imgW     = Math.round(imgH * (natW / natH));
+
   const drawingXml = [
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
     '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing"',
     '  xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"',
     '  xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">',
-    '  <xdr:twoCellAnchor editAs="oneCell">',
-    '    <xdr:from><xdr:col>0</xdr:col><xdr:colOff>50000</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>60000</xdr:rowOff></xdr:from>',
-    '    <xdr:to><xdr:col>3</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>1</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>',
+    '  <xdr:absoluteAnchor>',
+    `    <xdr:pos x="${MARGIN}" y="${MARGIN}"/>`,
+    `    <xdr:ext cx="${imgW}" cy="${imgH}"/>`,
     '    <xdr:pic>',
     '      <xdr:nvPicPr>',
     '        <xdr:cNvPr id="2" name="Logo IFSC"/>',
@@ -801,12 +826,12 @@ async function injectLogoIntoXlsx(xlsxBuffer) {
     '        <a:stretch><a:fillRect/></a:stretch>',
     '      </xdr:blipFill>',
     '      <xdr:spPr>',
-    '        <a:xfrm><a:off x="0" y="0"/><a:ext cx="1000000" cy="400000"/></a:xfrm>',
+    `        <a:xfrm><a:off x="${MARGIN}" y="${MARGIN}"/><a:ext cx="${imgW}" cy="${imgH}"/></a:xfrm>`,
     '        <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>',
     '      </xdr:spPr>',
     '    </xdr:pic>',
     '    <xdr:clientData/>',
-    '  </xdr:twoCellAnchor>',
+    '  </xdr:absoluteAnchor>',
     '</xdr:wsDr>',
   ].join('\n');
   zip.file('xl/drawings/drawing1.xml', drawingXml);
