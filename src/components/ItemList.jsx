@@ -1,6 +1,6 @@
 import ItemCard from './ItemCard';
 
-export default function ItemList({ items, onUpdate, onRemove, onDuplicate, onToggle, onFileAdd, onFileRemove, showToast }) {
+export default function ItemList({ items, onUpdate, onRemove, onDuplicate, onToggle, onFileAdd, onFileRemove, showToast, mostrarErros }) {
   if (items.length === 0) {
     return (
       <div className="empty-state">
@@ -25,6 +25,7 @@ export default function ItemList({ items, onUpdate, onRemove, onDuplicate, onTog
           onFileAdd={onFileAdd}
           onFileRemove={onFileRemove}
           showToast={showToast}
+          mostrarErros={mostrarErros}
         />
       ))}
     </div>

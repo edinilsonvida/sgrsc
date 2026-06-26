@@ -37,7 +37,8 @@ const _xe = (function() {
   function _xa(items, nivel) {
     var res = _xc(items);
     var tot = res.rsc1 + res.rsc2 + res.rsc3;
-    var npt = nivel ? res["rsc" + nivel.replace("RSC ", "")] : null;
+    var nivelKey = {"RSC I":"rsc1","RSC II":"rsc2","RSC III":"rsc3"}[nivel];
+    var npt = nivelKey ? res[nivelKey] : null;
     return {
       totals: res,
       totalGeral: tot,

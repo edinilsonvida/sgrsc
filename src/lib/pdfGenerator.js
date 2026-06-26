@@ -215,14 +215,14 @@ export async function generatePdf(items, dados, onProgress) {
     drawPageFooter(decDoc, logoWhiteDataUrl, logoNatW, logoNatH);
     decDoc.setFont('helvetica', 'normal'); decDoc.setFontSize(11); decDoc.setTextColor(30, 30, 30);
     const lines = decDoc.splitTextToSize(dados.memorialTexto, 170);
-    decDoc.text(lines, 20, 33);
+    decDoc.text(lines, 20, 40);
 
     // Local, data e assinatura
     const mesesMem = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
     const hojeMem  = new Date();
     const cidadeMem = (dados.cidade && dados.cidade.trim()) ? dados.cidade.trim() : '';
     const dataMem = `${cidadeMem ? cidadeMem + ', ' : ''}${hojeMem.getDate()} de ${mesesMem[hojeMem.getMonth()]} de ${hojeMem.getFullYear()}.`;
-    let mY = 33 + lines.length * 6.5 + 28;
+    let mY = 40 + lines.length * 6.5 + 28;
     decDoc.text(dataMem, 105, mY, { align: 'center' });
     mY += 37;
     decDoc.text('__________________________________________', 105, mY, { align: 'center' });
@@ -259,64 +259,139 @@ export async function generatePdf(items, dados, onProgress) {
     dirKeyMap[key].entries.push({ item, crit });
   }
 
-  // ── Table column x-positions (mm), table spans x=15 to x=185 (TW=170) ─
+  // ── Card layout helpers (professional card design, no table) ──────────
   const TX = 15, TW = 170;
-  const C = { num: 15, cod: 22, dsc: 41, dat: 110, qty: 133, fac: 150, pts: 167 };
 
-  const drawTblHeader = (d, y) => {
-    d.setFillColor(...azulIFSC); d.rect(TX, y, TW, 7, 'F');
+  const drawCritSubHdr = (d, y, crit, count, totalPts) => {
+    const ptsStr   = totalPts.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const countStr = `${count} registro${count !== 1 ? 's' : ''} cadastrado${count !== 1 ? 's' : ''}`;
+    const titleH = 10, sumH = 7, fullH = titleH + sumH;
+
+    // Layer 1: full block in dark navy — provides unified outer shape with rounded corners
+    d.setFillColor(7, 42, 95);
+    d.roundedRect(TX, y, TW, fullH, 2, 2, 'F');
+
+    // Layer 2: title area in azulIFSC — rounded top, flat bottom (rect squaring off the lower edge)
+    d.setFillColor(...azulIFSC);
+    d.roundedRect(TX, y, TW, titleH, 2, 2, 'F');
+    d.rect(TX, y + titleH - 2, TW, 2, 'F');
+
+    // Title text
+    d.setFont('helvetica', 'bold'); d.setFontSize(9); d.setTextColor(255, 255, 255);
+    d.text(`Critério ${crit.codigo} —`, TX + 3, y + 7);
+    const prefW = d.getTextWidth(`Critério ${crit.codigo} — `);
+    const descParts = d.splitTextToSize(crit.descricao, TW - 8 - prefW);
+    d.setFont('helvetica', 'normal'); d.setFontSize(8.5); d.setTextColor(200, 220, 255);
+    d.text(descParts[0] + (descParts.length > 1 ? '…' : ''), TX + 3 + prefW, y + 7);
+
+    // Summary text (inside dark navy area)
+    d.setFont('helvetica', 'normal'); d.setFontSize(7); d.setTextColor(150, 188, 232);
+    d.text(countStr, TX + 3.5, y + titleH + 4.8);
     d.setFont('helvetica', 'bold'); d.setFontSize(7.5); d.setTextColor(255, 255, 255);
-    d.text('#',                      C.num + 3.5, y + 4.8, { align: 'center' });
-    d.text('Critério',               C.cod + 9,   y + 4.8, { align: 'center' });
-    d.text('Descrição do documento', C.dsc + 2,   y + 4.8);
-    d.text('Data',                   C.dat + 11,  y + 4.8, { align: 'center' });
-    d.text('Qtd',                    C.qty + 8,   y + 4.8, { align: 'center' });
-    d.text('Fator',                  C.fac + 8,   y + 4.8, { align: 'center' });
-    d.text('Pontos',                 TX + TW - 1, y + 4.8, { align: 'right' });
+    d.text(`${ptsStr} pontos`, TX + TW - 3.5, y + titleH + 4.8, { align: 'right' });
+
+    return fullH + 4;
   };
 
-  const drawCritSubHdr = (d, y, crit) => {
-    d.setFillColor(228, 236, 250); d.rect(TX, y, TW, 6.5, 'F');
-    d.setFont('helvetica', 'bold'); d.setFontSize(7.5); d.setTextColor(...azulIFSC);
-    const desc = crit.descricao.length > 115 ? crit.descricao.slice(0, 112) + '...' : crit.descricao;
-    d.text(`Critério ${crit.codigo} — ${desc}`, TX + 2, y + 4.5);
+  const estimateCardH = (d, item) => {
+    d.setFont('helvetica', 'bold'); d.setFontSize(9.5);
+    const descLines = d.splitTextToSize(item.docDescricao || '—', TW - 8);
+    const hasObs = !!item.observacao?.trim();
+    d.setFont('helvetica', 'normal'); d.setFontSize(7.5);
+    const obsLines = hasObs ? d.splitTextToSize(item.observacao, TW - 8) : [];
+    const contentH = 7.5 + 3.5 + descLines.length * 5.5 + (hasObs ? 2 + obsLines.length * 4 : 0) + 3.5;
+    return contentH + 10 + 3;
   };
 
-  const drawItemRow = (d, y, rowNum, item, crit, isEven) => {
+  const drawItemCard = (d, y, rowNum, item, crit) => {
     const qty     = item.quantidade || '0';
     const pts     = (parseFloat(qty) * crit.fator).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const qtyStr  = `${qty} ${crit.unidade}(s)`;
+    const qtyStr  = `${qty} ${crit.unidade.toLowerCase()}(s)`;
     const dateStr = item.data ? item.data.split('-').reverse().join('/') : '—';
+    const hasObs  = !!item.observacao?.trim();
+
+    d.setFont('helvetica', 'bold'); d.setFontSize(9.5);
+    const descLines = d.splitTextToSize(item.docDescricao || '—', TW - 8);
     d.setFont('helvetica', 'normal'); d.setFontSize(7.5);
-    const descLines = d.splitTextToSize(item.docDescricao || '—', C.dat - C.dsc - 2);
-    const obsLines  = item.observacao?.trim() ? d.splitTextToSize(`Obs.: ${item.observacao}`, TW - 6) : [];
-    const rowH    = Math.max(7, descLines.length * 4.2 + 3.5);
-    const obsH    = obsLines.length > 0 ? obsLines.length * 3.8 + 3 : 0;
-    const totalH  = rowH + obsH;
-    if (isEven) { d.setFillColor(242, 247, 255); d.rect(TX, y, TW, totalH, 'F'); }
-    d.setDrawColor(210, 222, 238); d.setLineWidth(0.2);
-    [C.cod, C.dsc, C.dat, C.qty, C.fac, C.pts].forEach(cx => d.line(cx, y, cx, y + totalH));
-    d.line(TX, y + totalH, TX + TW, y + totalH);
-    const midY = y + rowH / 2 + 1.5;
-    d.setFont('helvetica', 'normal'); d.setFontSize(7); d.setTextColor(110, 110, 110);
-    d.text(String(rowNum), C.num + 3.5, midY, { align: 'center' });
-    d.setFont('helvetica', 'bold'); d.setFontSize(8); d.setTextColor(30, 30, 30);
-    d.text(String(crit.codigo), C.cod + 9, midY, { align: 'center' });
-    d.setFont('helvetica', 'normal'); d.setFontSize(7.5); d.setTextColor(30, 30, 30);
-    d.text(descLines, C.dsc + 2, y + 4.5);
-    d.text(dateStr, C.dat + 11, midY, { align: 'center' });
-    d.setFont('helvetica', 'bold'); d.setFontSize(7.5); d.setTextColor(...azulIFSC);
-    d.text(qtyStr, C.qty + 8, midY, { align: 'center' });
-    d.text(String(crit.fator), C.fac + 8, midY, { align: 'center' });
-    d.text(pts, TX + TW - 1, midY, { align: 'right' });
-    if (obsLines.length > 0) {
-      d.setFont('helvetica', 'italic'); d.setFontSize(7); d.setTextColor(90, 90, 90);
-      d.text(obsLines, TX + 3, y + rowH + 3.5);
+    const obsLines = hasObs ? d.splitTextToSize(item.observacao, TW - 8) : [];
+
+    const topH    = 7.5;
+    const descPad = 3.5;
+    const descH   = descLines.length * 5.5;
+    const obsH    = hasObs ? 2 + obsLines.length * 4 : 0;
+    const botPad  = 3.5;
+    const footH   = 10;
+    const contentH = topH + descPad + descH + obsH + botPad;
+    const totalH   = contentH + footH;
+
+    // Card shell
+    d.setFillColor(252, 253, 255);
+    d.setDrawColor(...bordaCard);
+    d.setLineWidth(0.25);
+    d.roundedRect(TX, y, TW, totalH, 2, 2, 'FD');
+
+    // Top metadata strip
+    d.setFillColor(240, 245, 252);
+    d.roundedRect(TX + 0.25, y + 0.25, TW - 0.5, topH, 2, 2, 'F');
+    d.rect(TX + 0.25, y + topH - 1.5, TW - 0.5, 1.5, 'F');
+    d.setLineWidth(0.15); d.setDrawColor(...bordaCard);
+    d.line(TX, y + topH, TX + TW, y + topH);
+
+    // "ITEM N" label
+    d.setFont('helvetica', 'bold'); d.setFontSize(7); d.setTextColor(...azulIFSC);
+    d.text(`ITEM ${rowNum}`, TX + 4, y + 5.3);
+
+    // "Data:" label + value
+    d.setFont('helvetica', 'normal'); d.setFontSize(7); d.setTextColor(130, 148, 175);
+    d.text('Data:', TX + TW - 33, y + 5.3);
+    d.setFont('helvetica', 'bold'); d.setFontSize(7); d.setTextColor(50, 75, 112);
+    d.text(dateStr, TX + TW - 3, y + 5.3, { align: 'right' });
+
+    // Description (bold)
+    d.setFont('helvetica', 'bold'); d.setFontSize(9.5); d.setTextColor(...textoCor);
+    d.text(descLines, TX + 4, y + topH + descPad + 4.5);
+
+    // Observação
+    if (hasObs) {
+      const obsY = y + topH + descPad + descH + 2 + 3.5;
+      d.setFont('helvetica', 'normal'); d.setFontSize(7.5); d.setTextColor(100, 115, 135);
+      d.text(obsLines, TX + 4, obsY);
     }
-    return totalH;
+
+    // Score footer — three equal columns
+    const fY = y + contentH;
+    d.setFillColor(228, 238, 255);
+    d.roundedRect(TX + 0.25, fY, TW - 0.5, footH - 0.25, 2, 2, 'F');
+    d.rect(TX + 0.25, fY, TW - 0.5, 2, 'F');
+    d.setLineWidth(0.15); d.setDrawColor(...bordaCard);
+    d.line(TX, fY, TX + TW, fY);
+
+    const bW = TW / 3;
+    d.setLineWidth(0.2); d.setDrawColor(198, 216, 242);
+    d.line(TX + bW,     fY + 1.5, TX + bW,     fY + footH - 1.5);
+    d.line(TX + bW * 2, fY + 1.5, TX + bW * 2, fY + footH - 1.5);
+
+    const lY = fY + 3.5;
+    const vY = fY + 8;
+    const cx = [TX + bW / 2, TX + bW * 1.5, TX + bW * 2.5];
+
+    [
+      ['QUANTIDADE', qtyStr,           cx[0]],
+      ['FATOR',      String(crit.fator), cx[1]],
+      ['PONTOS',     pts,               cx[2]],
+    ].forEach(([lbl, val, x]) => {
+      d.setFont('helvetica', 'normal'); d.setFontSize(6.5); d.setTextColor(108, 125, 152);
+      d.text(lbl, x, lY, { align: 'center' });
+      d.setFont('helvetica', 'bold');
+      d.setFontSize(lbl === 'PONTOS' ? 10 : 8.5);
+      d.setTextColor(...azulIFSC);
+      d.text(val, x, vY, { align: 'center' });
+    });
+
+    return totalH + 3;
   };
 
-  // ── One cover page per diretriz group with table of all its items ──────
+  // ── One cover page per diretriz group with flowing card layout ─────────
   const itemMetas  = [];
   const groupMetas = [];
 
@@ -327,38 +402,39 @@ export async function generatePdf(items, dados, onProgress) {
     drawPageFooter(coverDoc, logoWhiteDataUrl, logoNatW, logoNatH);
     const groupStartPage = currentTotalPages + 1;
     let coverPageCount   = 1;
-    let tableY           = 30;
+    let tableY           = 40;
 
-    drawTblHeader(coverDoc, tableY); tableY += 7;
+    // Pre-compute per-criterion stats for the summary strip
+    const critStats = {};
+    for (const { item, crit } of group.entries) {
+      if (!critStats[crit.codigo]) critStats[crit.codigo] = { count: 0, total: 0 };
+      critStats[crit.codigo].count++;
+      critStats[crit.codigo].total += parseFloat(item.quantidade || '0') * crit.fator;
+    }
 
     let lastCodigo = null, rowNum = 0;
 
     for (const { item, crit } of group.entries) {
       rowNum++;
       if (crit.codigo !== lastCodigo) {
-        if (tableY + 6.5 > 273) {
+        if (tableY + 21 > 275) {
           coverDoc.addPage();
           drawPageHeader(coverDoc, hdrTitle, logoWhiteDataUrl, logoNatW, logoNatH);
           drawPageFooter(coverDoc, logoWhiteDataUrl, logoNatW, logoNatH);
-          coverPageCount++; tableY = 30;
-          drawTblHeader(coverDoc, tableY); tableY += 7;
+          coverPageCount++; tableY = 40;
         }
-        drawCritSubHdr(coverDoc, tableY, crit); tableY += 6.5;
+        const stats = critStats[crit.codigo];
+        tableY += drawCritSubHdr(coverDoc, tableY, crit, stats.count, stats.total);
         lastCodigo = crit.codigo;
       }
-      coverDoc.setFont('helvetica', 'normal'); coverDoc.setFontSize(7.5);
-      const descEst   = coverDoc.splitTextToSize(item.docDescricao || '—', C.dat - C.dsc - 2);
-      const obsEst    = item.observacao?.trim() ? coverDoc.splitTextToSize(`Obs.: ${item.observacao}`, TW - 6) : [];
-      const rowHEst   = Math.max(7, descEst.length * 4.2 + 3.5);
-      const totalHEst = rowHEst + (obsEst.length > 0 ? obsEst.length * 3.8 + 3 : 0);
-      if (tableY + totalHEst > 273) {
+      const cardH = estimateCardH(coverDoc, item);
+      if (tableY + cardH - 3 > 275) {
         coverDoc.addPage();
         drawPageHeader(coverDoc, hdrTitle, logoWhiteDataUrl, logoNatW, logoNatH);
         drawPageFooter(coverDoc, logoWhiteDataUrl, logoNatW, logoNatH);
-        coverPageCount++; tableY = 30;
-        drawTblHeader(coverDoc, tableY); tableY += 7;
+        coverPageCount++; tableY = 40;
       }
-      tableY += drawItemRow(coverDoc, tableY, rowNum, item, crit, rowNum % 2 === 0);
+      tableY += drawItemCard(coverDoc, tableY, rowNum, item, crit);
     }
 
     currentTotalPages += coverPageCount;
@@ -398,13 +474,13 @@ export async function generatePdf(items, dados, onProgress) {
   const sumDoc = new JPDF();
   drawPageHeader(sumDoc, 'SUMÁRIO', logoWhiteDataUrl, logoNatW, logoNatH);
   drawPageFooter(sumDoc, logoWhiteDataUrl, logoNatW, logoNatH);
-  let sumY = 36;
+  let sumY = 40;
   for (const meta of itemMetas) {
     if (sumY > 275) {
       sumDoc.addPage();
       drawPageHeader(sumDoc, 'SUMÁRIO', logoWhiteDataUrl, logoNatW, logoNatH);
       drawPageFooter(sumDoc, logoWhiteDataUrl, logoNatW, logoNatH);
-      sumY = 33;
+      sumY = 40;
     }
     const pageText = meta.startPage === meta.endPage ? `Pág. ${meta.startPage}` : `Páginas ${meta.startPage} a ${meta.endPage}`;
     sumDoc.setFont('helvetica', 'bold'); sumDoc.setTextColor(30, 30, 30); sumDoc.setFontSize(11);
@@ -477,6 +553,7 @@ export async function generatePdf(items, dados, onProgress) {
   // Merge
   onProgress?.('Unificando PDF...');
   const addPages = async (src) => {
+    if (!src) return;
     const ps = await finalPdf.copyPages(src, src.getPageIndices());
     ps.forEach(p => finalPdf.addPage(p));
   };
@@ -484,15 +561,17 @@ export async function generatePdf(items, dados, onProgress) {
   if (decPdf) await addPages(decPdf);
   await addPages(decSimplesPdf);
   await addPages(sumPdf);
-  for (const meta of itemMetas) {
-    await addPages(meta.itemCoverPdf);
-    for (const f of meta.loadedFiles) {
-      if (f.type === 'pdf') {
-        await addPages(f.doc);
-      } else {
-        const page = finalPdf.addPage([595.28, 841.89]);
-        const dims = f.img.scaleToFit(500, 750);
-        page.drawImage(f.img, { x: (595.28 - dims.width) / 2, y: (841.89 - dims.height) / 2, ...dims });
+  for (const group of groupMetas) {
+    await addPages(group.coverPdf);
+    for (const entry of group.entries) {
+      for (const f of entry.loadedFiles) {
+        if (f.type === 'pdf') {
+          await addPages(f.doc);
+        } else {
+          const page = finalPdf.addPage([595.28, 841.89]);
+          const dims = f.img.scaleToFit(500, 750);
+          page.drawImage(f.img, { x: (595.28 - dims.width) / 2, y: (841.89 - dims.height) / 2, ...dims });
+        }
       }
     }
   }
@@ -545,4 +624,6 @@ export async function generatePdf(items, dados, onProgress) {
   const bytes = await finalPdf.save();
   const blob  = new Blob([bytes], { type: 'application/pdf' });
   window.saveAs(blob, `Memorial_RSC_${siape || 'sem_siape'}.pdf`);
+
+  return itemMetas.map(m => ({ startPage: m.startPage, endPage: m.endPage }));
 }

@@ -15,7 +15,7 @@ function displayToIso(s) {
   return p.length === 3 ? `${p[2]}-${p[1]}-${p[0]}` : s;
 }
 
-export default function ItemCard({ item, index, onUpdate, onRemove, onDuplicate, onToggle, onFileAdd, onFileRemove, showToast }) {
+export default function ItemCard({ item, index, onUpdate, onRemove, onDuplicate, onToggle, onFileAdd, onFileRemove, showToast, mostrarErros }) {
   const crit   = getCriterio(item.codigo);
   const isOpen = !!item.isOpen;
   const num    = index + 1;
@@ -62,6 +62,14 @@ export default function ItemCard({ item, index, onUpdate, onRemove, onDuplicate,
     onUpdate(item.id, 'quantidade', isNaN(val) ? v : String(val));
   };
 
+  const errDesc = mostrarErros && !item.docDescricao?.trim();
+  const errData = mostrarErros && !item.data;
+  const errQtd  = mostrarErros && (!item.quantidade || parseFloat(item.quantidade) <= 0);
+  const hasErr  = errDesc || errData || errQtd;
+
+  const errStyle = { borderColor: '#e74c3c', boxShadow: '0 0 0 2px rgba(231,76,60,0.12)' };
+  const errMsg   = <span style={{ fontSize: '0.72rem', color: '#e74c3c', marginTop: 3, display: 'block' }}>Campo obrigatório</span>;
+
   return (
     <div className="accordion-item">
       {/* Header */}
@@ -69,7 +77,14 @@ export default function ItemCard({ item, index, onUpdate, onRemove, onDuplicate,
         onClick={() => onToggle(item.id)}
         style={{ cursor: 'pointer', background: hdrBg, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, userSelect: 'none' }}
       >
-        <div style={{ flexShrink: 0, width: 26, height: 26, background: chipBg, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 700, color: '#fff' }}>{num}</div>
+        <div style={{ position: 'relative', flexShrink: 0 }}>
+          <div style={{ width: 26, height: 26, background: chipBg, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 700, color: '#fff' }}>{num}</div>
+          {hasErr && !isOpen && (
+            <div style={{ position: 'absolute', top: -4, right: -4, width: 12, height: 12, background: '#e74c3c', borderRadius: '50%', border: '2px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ color: '#fff', fontSize: '0.52rem', fontWeight: 900, lineHeight: 1 }}>!</span>
+            </div>
+          )}
+        </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 700, fontSize: '0.87rem', color: hdrColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{headerTitle}</div>
           {!isOpen && <div style={{ fontSize: '0.74rem', color: subColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 2 }}>{headerDesc}</div>}
@@ -102,17 +117,21 @@ export default function ItemCard({ item, index, onUpdate, onRemove, onDuplicate,
             <div className="col-12 mb-3">
               <div className="br-input">
                 <label>Descrição do documento <span style={{ color: '#c0392b' }}>*</span></label>
-                <input type="text" value={item.docDescricao || ''} onChange={e => onUpdate(item.id, 'docDescricao', e.target.value)} placeholder="Descreva o documento comprobatório" />
+                <input type="text" value={item.docDescricao || ''} onChange={e => onUpdate(item.id, 'docDescricao', e.target.value)} placeholder="Descreva o documento comprobatório"
+                  style={errDesc ? errStyle : undefined} />
+                {errDesc && errMsg}
               </div>
             </div>
 
             <div className="col-sm-4 mb-3">
               <div data-dtp="1" className="br-input has-icon">
                 <label htmlFor={`dataItem_${item.id}`}>Data <span style={{ color: '#c0392b' }}>*</span></label>
-                <input id={`dataItem_${item.id}`} ref={dtpRef} type="text" placeholder="dd/mm/aaaa" defaultValue={isoToDisplay(item.data)} autoComplete="off" />
+                <input id={`dataItem_${item.id}`} ref={dtpRef} type="text" placeholder="dd/mm/aaaa" defaultValue={isoToDisplay(item.data)} autoComplete="off"
+                  style={errData ? errStyle : undefined} />
                 <button data-cal="1" className="br-button circle small" type="button" aria-label="Abrir calendário">
                   <i className="fas fa-calendar-alt" />
                 </button>
+                {errData && errMsg}
               </div>
             </div>
 
@@ -127,7 +146,9 @@ export default function ItemCard({ item, index, onUpdate, onRemove, onDuplicate,
               <div className="br-input">
                 <label>Quantidade <span style={{ color: '#c0392b' }}>*</span></label>
                 <input type="number" step="0.01" min="0" max={crit?.quantidadeMaxima}
-                  value={item.quantidade || ''} onChange={e => handleQtd(e.target.value)} placeholder="0" />
+                  value={item.quantidade || ''} onChange={e => handleQtd(e.target.value)} placeholder="0"
+                  style={errQtd ? errStyle : undefined} />
+                {errQtd && errMsg}
                 {crit && (
                   <div style={{ fontSize: '0.72rem', color: '#6b7f99', marginTop: 4 }}>
                     Fator: {crit.fator.toLocaleString('pt-BR')} pontos/unidade | <strong>Limite: {crit.quantidadeMaxima} {crit.unidade}(s)</strong>

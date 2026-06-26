@@ -39,6 +39,7 @@ export default function App() {
   const [nextId, setNextId] = useState(1);
   const [generating, setGenerating]   = useState(false);
   const [mostrarErros, setMostrarErros] = useState(false);
+  const [pageMetas, setPageMetas]     = useState(null);
 
   const CAMPOS_OBRIGATORIOS = ['nome', 'siape', 'nivelPretendido', 'email', 'celular', 'dataLimite'];
   const dadosValidos = () => CAMPOS_OBRIGATORIOS.every(f => dados[f]?.trim?.() || dados[f]);
@@ -113,11 +114,19 @@ export default function App() {
   const validarAntes = () => {
     if (!dadosValidos()) {
       setMostrarErros(true);
-      showMsg('Preencha todos os campos obrigatórios (marcados com *) antes de gerar.');
+      showMsg('Preencha todos os campos obrigatórios antes de gerar.');
       return false;
     }
     if (items.length === 0) {
       showMsg('Adicione pelo menos um comprovante antes de gerar.');
+      return false;
+    }
+    const semCampos = items.filter(i =>
+      !i.docDescricao?.trim() || !i.data || !i.quantidade || parseFloat(i.quantidade) <= 0
+    );
+    if (semCampos.length > 0) {
+      setMostrarErros(true);
+      showMsg(`${semCampos.length} item(ns) com campos obrigatórios não preenchidos (Descrição, Data ou Quantidade).`);
       return false;
     }
     const semAnexo = items.filter(i => !i.files || i.files.length === 0);
@@ -134,7 +143,7 @@ export default function App() {
     setGenerating(true);
     try {
       const sorted = sortItems(items);
-      await generateExcel(sorted, dados);
+      await generateExcel(sorted, dados, pageMetas);
       showToast('Formulário de avaliação XLSX gerado com sucesso!');
     } catch (err) {
       showMsg(err.message || 'Erro ao gerar planilha.');
@@ -149,7 +158,8 @@ export default function App() {
     setGenerating(true);
     try {
       const sorted = sortItems(items);
-      await generatePdf(sorted, dados, msg => showToast(msg));
+      const metas = await generatePdf(sorted, dados, msg => showToast(msg));
+      if (metas) setPageMetas(metas);
       showToast('Arquivo PDF unificado gerado com sucesso!');
     } catch (err) {
       showMsg((err.message || 'Erro ao gerar o PDF.') + ' Verifique se os arquivos anexados são válidos.');
@@ -203,6 +213,7 @@ export default function App() {
                 onFileAdd={handleFileAdd}
                 onFileRemove={handleFileRemove}
                 showToast={showToast}
+                mostrarErros={mostrarErros}
               />
               <ScorePanel items={items} nivelPretendido={dados.nivelPretendido} />
             </div>

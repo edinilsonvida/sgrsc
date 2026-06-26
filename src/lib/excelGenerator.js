@@ -49,8 +49,8 @@ const S = {
   infoValL: mkS(C.WHITE,     C.DARK_TEXT, 10, true, 'left',   'center', false, C.BLU_BDR),
   infoValC: mkS(C.WHITE,     C.DARK_TEXT, 10, true, 'center', 'center', false, C.BLU_BDR),
   evalLbl:  mkS(C.DARK_BLUE, C.WHITE,    8, true,  'center', 'center', true,  C.DARK_BLUE),
-  evalValL: mkS(C.CREAM,     C.AMBER,     9, false, 'left',   'center', false, C.AMB_BDR, true),
-  evalValC: mkS(C.CREAM,     C.AMBER,     9, false, 'center', 'center', false, C.AMB_BDR, true),
+  evalValL: { ...mkS(C.CREAM, C.AMBER,  9, false, 'left',   'center', false, C.AMB_BDR, true),  protection: { locked: false } },
+  evalValC: { ...mkS(C.CREAM, C.AMBER,  9, false, 'center', 'center', false, C.AMB_BDR, true),  protection: { locked: false } },
 
   // Column headers by section
   hdrG: mkS(C.IFSC_GREEN,  C.WHITE, 8, true, 'center', 'center', true, C.IFSC_GREEN),
@@ -63,8 +63,8 @@ const S = {
   dPreL:  mkS(C.PALE_GREEN, 'FF1A4A28', 9, false, 'left',  'center', true,  C.GRN_BDR),
   dPreC:  mkS(C.PALE_GREEN, 'FF1A4A28', 9, false, 'center','center', false, C.GRN_BDR),
   dScore: mkS(C.PALE_BLUE,  C.DARK_BLUE, 9, true, 'center','center', false, C.BLU_BDR),
-  dEvalC: mkS(C.CREAM,      C.DARK_TEXT, 9, false, 'center','center', false, C.AMB_BDR),
-  dEvalL: mkS(C.CREAM,      C.DARK_TEXT, 9, false, 'left',  'center', true,  C.AMB_BDR),
+  dEvalC: { ...mkS(C.CREAM, C.AMBER, 9, false, 'center', 'center', false, C.AMB_BDR, true), protection: { locked: false } },
+  dEvalL: { ...mkS(C.CREAM, C.AMBER, 9, false, 'left',  'center', true,  C.AMB_BDR, true), protection: { locked: false } },
 
   // Summary section
   sumTitle: mkS(C.DARK_BLUE,  C.WHITE,      10, true, 'center', 'center', false, C.DARK_BLUE),
@@ -118,20 +118,20 @@ function todayDisplay() { return isoToDisplay(new Date().toISOString().split('T'
 // ── Column definitions (15 cols A–O) ──────────────────────────────────────
 // [colIndex, header label, wch width, hdrStyle, dataStyleLeft, dataStyleCenter, isVlookup(0=no/N=colN), isPreFilled, isScore, isEval]
 const COLS = [
-  [0,  'Critério',                         10, 'hdrG', 'dLookC', null,  0, true,  false, false],
-  [1,  'Nome do Critério',                 50, 'hdrG', 'dLookL', null,  2, false, false, false],
-  [2,  'Fator de Pontuação',               10, 'hdrG', 'dLookC', null,  3, false, false, false],
-  [3,  'Unidade',                          14, 'hdrG', 'dLookL', null,  4, false, false, false],
-  [4,  'Quantidade Máxima de Unidades',    16, 'hdrG', 'dLookC', null,  5, false, false, false],
-  [5,  'Nível',                             8, 'hdrG', 'dLookC', null,  6, false, false, false],
-  [6,  'Diretriz',                         10, 'hdrG', 'dLookC', null,  7, false, false, false],
-  [7,  'Nome do Documento Comprobatório',   44, 'hdrB', 'dPreL',  null,  0, true,  false, false],
+  [0,  'Critério',                         10, 'hdrB', 'dPreC',  null,  0, true,  false, false],
+  [1,  'Nome do Critério',                 50, 'hdrB', 'dPreL',  null,  2, false, false, false],
+  [2,  'Fator de Pontuação',               10, 'hdrB', 'dPreC',  null,  3, false, false, false],
+  [3,  'Unidade',                          14, 'hdrB', 'dPreL',  null,  4, false, false, false],
+  [4,  'Quantidade Máxima de Unidades',    16, 'hdrB', 'dPreC',  null,  5, false, false, false],
+  [5,  'Nível',                             8, 'hdrB', 'dPreC',  null,  6, false, false, false],
+  [6,  'Diretriz',                         10, 'hdrB', 'dPreC',  null,  7, false, false, false],
+  [7,  'Nome do Documento Comprobatório',  44, 'hdrB', 'dPreL',  null,  0, true,  false, false],
   [8,  'Data do Documento',                12, 'hdrB', 'dPreC',  null,  0, true,  false, false],
-  [9,  'Página Início',                     8, 'hdrB', 'dPreC',  null,  0, false, false, false],
-  [10, 'Página Fim',                        8, 'hdrB', 'dPreC',  null,  0, false, false, false],
+  [9,  'Página Inicial',                    8, 'hdrB', 'dPreC',  null,  0, false, false, false],
+  [10, 'Página Final',                      8, 'hdrB', 'dPreC',  null,  0, false, false, false],
   [11, 'Quantidade Apresentada',           12, 'hdrB', 'dPreC',  null,  0, true,  false, false],
   [12, 'Pontuação Requerida',              14, 'hdrB', 'dPreC',  null,  0, false, true,  false],
-  [13, 'Pontuação Deferida',              14, 'hdrA', 'dEvalC', null,  0, false, false, true],
+  [13, 'Pontuação Deferida do(a) Avaliador(a)', 14, 'hdrA', 'dEvalC', null, 0, false, false, true],
   [14, 'Observação / Indeferimento',       32, 'hdrA', 'dEvalL', null,  0, false, false, true],
 ];
 const NCOL = 14; // last col index (O)
@@ -162,7 +162,7 @@ function buildAuxiliarSheet(criterios) {
 }
 
 // ── Main sheet ────────────────────────────────────────────────────────────
-function buildMainSheet(items, dados, criterios) {
+function buildMainSheet(items, dados, criterios, pageMetas) {
   const ws      = {};
   const merges  = [];
   function merge(r1, c1, r2, c2) { merges.push({ s: { r: r1, c: c1 }, e: { r: r2, c: c2 } }); }
@@ -178,16 +178,16 @@ function buildMainSheet(items, dados, criterios) {
   const R_DATA  = 7;  // Data rows begin
 
   // ── Row 0: Brand / Title bar ──────────────────────────────────────────────
-  // [A-C] IFSC brand block — green, bold, large
+  // [A-C] IFSC brand block — green background for logo image overlay
   const sIfsc = mkS(C.IFSC_GREEN, C.WHITE, 22, true, 'center', 'center', false, C.GREEN_DK);
-  setCell(ws, R_LOGO, 0, 'IFSC', 's', sIfsc);
+  setCell(ws, R_LOGO, 0, '', 's', sIfsc);
   for (let c = 1; c <= 2; c++) setCell(ws, R_LOGO, c, '', 's', sIfsc);
   merge(R_LOGO, 0, R_LOGO, 2);
 
   // [D-M] Title + subtitle (2-line, wrapText)
   const sTit = mkS(C.DARK_BLUE, C.WHITE, 11, true, 'center', 'center', true, C.DARK_BLUE);
   setCell(ws, R_LOGO, 3,
-    'FORMULÁRIO DE AVALIAÇÃO RSC — Reconhecimento de Saberes e Competências\nInstituto Federal de Santa Catarina (IFSC)  |  Res. CONSUP nº 29/2014',
+    'FORMULÁRIO DE AVALIAÇÃO DO RSC — Reconhecimento de Saberes e Competências\nInstituto Federal de Santa Catarina (IFSC)  |  Res. CONSUP nº 29/2014',
     's', sTit);
   for (let c = 4; c <= NCOL; c++) setCell(ws, R_LOGO, c, '', 's', sTit);
   merge(R_LOGO, 3, R_LOGO, NCOL);
@@ -248,7 +248,7 @@ function buildMainSheet(items, dados, criterios) {
 
   // ── Row 4: Evaluator info (15 cols A–O) ──────────────────────────────────
   // [A-B] label | [C-K] nome avaliador (editable) | [L-M] label | [N-O] data
-  setCell(ws, R_EVAL, 0, 'AVALIADOR', 's', S.evalLbl);
+  setCell(ws, R_EVAL, 0, 'AVALIADOR(A)', 's', S.evalLbl);
   setCell(ws, R_EVAL, 1, '',          's', S.evalLbl);
   merge(R_EVAL, 0, R_EVAL, 1);
 
@@ -277,27 +277,28 @@ function buildMainSheet(items, dados, criterios) {
   items.forEach((item, idx) => {
     const r   = R_DATA + idx;
     const rXL = r + 1; // 1-based for formula references
+    const pm  = pageMetas?.[idx];
 
     // A: Critério (pre-filled)
-    setCell(ws, r, 0, Number(item.codigo), 'n', S.dLookC);
+    setCell(ws, r, 0, Number(item.codigo), 'n', S.dPreC);
 
     // B: Nome Critério (VLOOKUP 2)
-    setCell(ws, r, 1, '', 's', S.dLookL, `IFERROR(VLOOKUP(A${rXL},${AUX},2,0),"")`);
+    setCell(ws, r, 1, '', 's', S.dPreL, `IFERROR(VLOOKUP(A${rXL},${AUX},2,0),"")`);
 
     // C: Fator (VLOOKUP 3)
-    setCell(ws, r, 2, 0, 'n', S.dLookC, `IFERROR(VLOOKUP(A${rXL},${AUX},3,0),"")`);
+    setCell(ws, r, 2, 0, 'n', S.dPreC, `IFERROR(VLOOKUP(A${rXL},${AUX},3,0),"")`);
 
     // D: Unidade (VLOOKUP 4)
-    setCell(ws, r, 3, '', 's', S.dLookL, `IFERROR(VLOOKUP(A${rXL},${AUX},4,0),"")`);
+    setCell(ws, r, 3, '', 's', S.dPreL, `IFERROR(VLOOKUP(A${rXL},${AUX},4,0),"")`);
 
     // E: Quantidade Máxima (VLOOKUP 5)
-    setCell(ws, r, 4, 0, 'n', S.dLookC, `IFERROR(VLOOKUP(A${rXL},${AUX},5,0),"")`);
+    setCell(ws, r, 4, 0, 'n', S.dPreC, `IFERROR(VLOOKUP(A${rXL},${AUX},5,0),"")`);
 
     // F: Nível (VLOOKUP 6)
-    setCell(ws, r, 5, '', 's', S.dLookC, `IFERROR(VLOOKUP(A${rXL},${AUX},6,0),"")`);
+    setCell(ws, r, 5, '', 's', S.dPreC, `IFERROR(VLOOKUP(A${rXL},${AUX},6,0),"")`);
 
     // G: Diretriz (VLOOKUP 7)
-    setCell(ws, r, 6, '', 's', S.dLookC, `IFERROR(VLOOKUP(A${rXL},${AUX},7,0),"")`);
+    setCell(ws, r, 6, '', 's', S.dPreC, `IFERROR(VLOOKUP(A${rXL},${AUX},7,0),"")`);
 
     // H: Nome do Documento Comprobatório (pre-filled)
     setCell(ws, r, 7, item.docDescricao || '', 's', S.dPreL);
@@ -305,26 +306,26 @@ function buildMainSheet(items, dados, criterios) {
     // I: Data do Documento (pre-filled)
     setCell(ws, r, 8, isoToDisplay(item.data), 's', S.dPreC);
 
-    // J: Página Início (requerente preenche manualmente)
-    setCell(ws, r, 9, '', 's', S.dPreC);
+    // J: Página Inicial (from PDF generation)
+    setCell(ws, r, 9, pm?.startPage ?? '', pm?.startPage ? 'n' : 's', S.dPreC);
 
-    // K: Página Fim (requerente preenche manualmente)
-    setCell(ws, r, 10, '', 's', S.dPreC);
+    // K: Página Final (from PDF generation)
+    setCell(ws, r, 10, pm?.endPage ?? '', pm?.endPage ? 'n' : 's', S.dPreC);
 
     // L: Quantidade Apresentada (pre-filled)
     const qty = (item.quantidade !== '' && item.quantidade !== undefined)
       ? Number(item.quantidade) : 0;
     setCell(ws, r, 11, qty, 'n', S.dPreC);
 
-    // M: Pontuação Requerida — MIN(Fator × Qtde, Fator × QtdeMax) = IF(C*L >= C*E, C*E, C*L)
+    // M: Pontuação Requerida — MIN(Fator × Qtde, Fator × QtdeMax)
     setCell(ws, r, 12, 0, 'n', S.dPreC,
       `IFERROR(IF(C${rXL}*L${rXL}>=C${rXL}*E${rXL},C${rXL}*E${rXL},C${rXL}*L${rXL}),0)`);
 
-    // N: Pontuação Deferida (avaliador preenche)
+    // N: Pontuação Deferida (avaliador preenche — itálico âmbar)
     setCell(ws, r, 13, '', 's', S.dEvalC);
 
-    // O: Observação / Indeferimento (avaliador preenche)
-    setCell(ws, r, 14, item.observacao || '', 's', S.dEvalL);
+    // O: Observação / Indeferimento (avaliador preenche — vazio)
+    setCell(ws, r, 14, '', 's', S.dEvalL);
   });
 
   // ── Summary / Comparison section ──────────────────────────────────────────
@@ -358,8 +359,8 @@ function buildMainSheet(items, dados, criterios) {
   const sumHdrCols = [
     [0,  3,  'Nível de RSC'],
     [4,  5,  'Nº de Itens'],
-    [6,  9,  'Pontuação do Requerente'],
-    [10, 13, 'Pontuação Deferida (Avaliador)'],
+    [6,  9,  'Pontuação do(a) Requerente'],
+    [10, 13, 'Pontuação Deferida do(a) Avaliador(a)'],
     [14, 14, 'Diferença'],
   ];
   sumHdrCols.forEach(([c1, c2, label]) => {
@@ -476,9 +477,9 @@ function buildMainSheet(items, dados, criterios) {
     setCell(ws, evlRow, 11, '', 's', S.sumHdr);
     merge(evlRow, 10, evlRow, 11);
 
-    setCell(ws, evlRow, 12, 'Pontuação do Requerente', 's', S.sumHdr);
+    setCell(ws, evlRow, 12, 'Pontuação do(a) Requerente', 's', S.sumHdr);
 
-    setCell(ws, evlRow, 13, 'Pontuação Deferida', 's', S.sumHdr);
+    setCell(ws, evlRow, 13, 'Pontuação Deferida do(a) Avaliador(a)', 's', S.sumHdr);
     setCell(ws, evlRow, 14, '', 's', S.sumHdr);
     merge(evlRow, 13, evlRow, 14);
     evlRow++;
@@ -540,8 +541,8 @@ function buildMainSheet(items, dados, criterios) {
   setCell(ws, evlRow, 0, '', 's', S.sumHdr);
   for (let c = 1; c <= 11; c++) setCell(ws, evlRow, c, '', 's', S.sumHdr);
   merge(evlRow, 0, evlRow, 11);
-  setCell(ws, evlRow, 12, 'Pontuação do Requerente', 's', S.sumHdr);
-  setCell(ws, evlRow, 13, 'Pontuação Deferida', 's', S.sumHdr);
+  setCell(ws, evlRow, 12, 'Pontuação do(a) Requerente', 's', S.sumHdr);
+  setCell(ws, evlRow, 13, 'Pontuação Deferida do(a) Avaliador(a)', 's', S.sumHdr);
   setCell(ws, evlRow, 14, '', 's', S.sumHdr);
   merge(evlRow, 13, evlRow, 14);
   evlRow++;
@@ -550,7 +551,7 @@ function buildMainSheet(items, dados, criterios) {
   const sumLblS = mkS(C.PALE_BLUE, C.DARK_BLUE, 9, true, 'right', 'center', false, C.BLU_BDR);
   niveisOrder.forEach((nivel) => {
     const totXL = nivelTotXL[nivel];
-    setCell(ws, evlRow, 0, `Total de Pontos ${nivel} =`, 's', sumLblS);
+    setCell(ws, evlRow, 0, `Total de Pontos do ${nivel} =`, 's', sumLblS);
     for (let c = 1; c <= 11; c++) setCell(ws, evlRow, c, '', 's', sumLblS);
     merge(evlRow, 0, evlRow, 11);
     setCell(ws, evlRow, 12, 0, 'n', S.sumReq, totXL ? `M${totXL}` : `SUMIF(${F_RNG},"${nivel}",${K_RNG})`);
@@ -566,7 +567,7 @@ function buildMainSheet(items, dados, criterios) {
   evlRow++;
 
   // Total Geral
-  setCell(ws, evlRow, 0, 'Total Geral de Pontos RSC =', 's', S.sumTotal);
+  setCell(ws, evlRow, 0, 'Total Geral de Pontos do RSC =', 's', S.sumTotal);
   for (let c = 1; c <= 11; c++) setCell(ws, evlRow, c, '', 's', S.sumTotal);
   merge(evlRow, 0, evlRow, 11);
   setCell(ws, evlRow, 12, 0, 'n', S.sumTotal, `SUM(${K_RNG})`);
@@ -600,8 +601,8 @@ function buildMainSheet(items, dados, criterios) {
   // Column headers
   const lvlHdrCols = [
     [0,  2,  'Nível de RSC'],
-    [3,  6,  'Pontuação do Requerente'],
-    [7,  10, 'Pontuação Deferida'],
+    [3,  6,  'Pontuação do(a) Requerente'],
+    [7,  10, 'Pontuação Deferida do(a) Avaliador(a)'],
     [11, 12, 'Mínimo do Regulamento'],
     [13, 14, 'Situação (Requerente)'],
   ];
@@ -686,7 +687,7 @@ function buildMainSheet(items, dados, criterios) {
   ws['!cols'] = COLS.map(([, , wch]) => ({ wch }));
 
   ws['!rows'] = [
-    { hpt: 38 },  // R0  brand block (IFSC + title, 2-line)
+    { hpt: 46 },  // R0  brand block (logo image + title, 2-line)
     { hpt:  4 },  // R1  separator
     { hpt: 22 },  // R2  candidate
     { hpt: 22 },  // R3  dates + RT
@@ -715,14 +716,14 @@ function buildMainSheet(items, dados, criterios) {
 }
 
 // ── Public export ──────────────────────────────────────────────────────────
-export async function generateExcel(items, dados) {
+export async function generateExcel(items, dados, pageMetas) {
   if (!window.XLSX) throw new Error('SheetJS não carregado.');
   if (!items || items.length === 0) throw new Error('Adicione pelo menos um item antes de gerar o formulário.');
 
   const criterios = getCriterios();
   const wb = window.XLSX.utils.book_new();
 
-  const wsMain = buildMainSheet(items, dados, criterios);
+  const wsMain = buildMainSheet(items, dados, criterios, pageMetas);
   window.XLSX.utils.book_append_sheet(wb, wsMain, 'Proposta de Pontuação-RSC');
 
   const wsAux = buildAuxiliarSheet(criterios);
@@ -755,5 +756,116 @@ export async function generateExcel(items, dados) {
     .replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '').substring(0, 30);
   const fileName = `Formulario_RSC_${candidateName}.xlsx`;
 
-  window.XLSX.writeFile(wb, fileName, { bookType: 'xlsx', cellStyles: true });
+  const xlsxBuf = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array', cellStyles: true });
+  const finalBuf = await injectLogoIntoXlsx(xlsxBuf);
+  window.saveAs(
+    new Blob([finalBuf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+    fileName
+  );
+}
+
+// ── Logo injection via JSZip post-processing ───────────────────────────────
+async function injectLogoIntoXlsx(xlsxBuffer) {
+  if (!window.JSZip) return xlsxBuffer;
+
+  let logoBytes;
+  try {
+    const resp = await fetch('/logo-ifsc.png');
+    if (!resp.ok) return xlsxBuffer;
+    logoBytes = await resp.arrayBuffer();
+  } catch {
+    return xlsxBuffer;
+  }
+
+  const zip = await window.JSZip.loadAsync(xlsxBuffer);
+
+  // 1. Image file
+  zip.file('xl/media/logo.png', logoBytes);
+
+  // 2. Drawing XML — twoCellAnchor spanning A1:C1 (cols 0-2, row 0)
+  const drawingXml = [
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+    '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing"',
+    '  xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"',
+    '  xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">',
+    '  <xdr:twoCellAnchor editAs="oneCell">',
+    '    <xdr:from><xdr:col>0</xdr:col><xdr:colOff>50000</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>60000</xdr:rowOff></xdr:from>',
+    '    <xdr:to><xdr:col>3</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>1</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>',
+    '    <xdr:pic>',
+    '      <xdr:nvPicPr>',
+    '        <xdr:cNvPr id="2" name="Logo IFSC"/>',
+    '        <xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr>',
+    '      </xdr:nvPicPr>',
+    '      <xdr:blipFill>',
+    '        <a:blip r:embed="rId1"/>',
+    '        <a:stretch><a:fillRect/></a:stretch>',
+    '      </xdr:blipFill>',
+    '      <xdr:spPr>',
+    '        <a:xfrm><a:off x="0" y="0"/><a:ext cx="1000000" cy="400000"/></a:xfrm>',
+    '        <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>',
+    '      </xdr:spPr>',
+    '    </xdr:pic>',
+    '    <xdr:clientData/>',
+    '  </xdr:twoCellAnchor>',
+    '</xdr:wsDr>',
+  ].join('\n');
+  zip.file('xl/drawings/drawing1.xml', drawingXml);
+
+  // 3. Drawing relationships (image → logo.png)
+  zip.file('xl/drawings/_rels/drawing1.xml.rels', [
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
+    '  <Relationship Id="rId1"',
+    '    Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"',
+    '    Target="../media/logo.png"/>',
+    '</Relationships>',
+  ].join('\n'));
+
+  // 4. Find first worksheet file and inject <drawing r:id="rId_logo"/>
+  const sheetFiles = Object.keys(zip.files)
+    .filter(f => /^xl\/worksheets\/sheet\d+\.xml$/.test(f))
+    .sort();
+  if (sheetFiles.length > 0) {
+    let sheetXml = await zip.file(sheetFiles[0]).async('string');
+    if (!sheetXml.includes('<drawing ')) {
+      // Ensure r: namespace is present on the root element
+      if (!sheetXml.includes('xmlns:r=')) {
+        sheetXml = sheetXml.replace('<worksheet ', '<worksheet xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ');
+      }
+      sheetXml = sheetXml.replace('</worksheet>', '<drawing r:id="rId_logo"/></worksheet>');
+    }
+    zip.file(sheetFiles[0], sheetXml);
+
+    // 5. Sheet relationships — add drawing entry
+    const sheetRelsPath = sheetFiles[0].replace('xl/worksheets/', 'xl/worksheets/_rels/').replace('.xml', '.xml.rels');
+    const drawingRel = '  <Relationship Id="rId_logo" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/>';
+    const existingRels = zip.file(sheetRelsPath);
+    if (existingRels) {
+      let relsXml = await existingRels.async('string');
+      if (!relsXml.includes('drawing1.xml')) {
+        relsXml = relsXml.replace('</Relationships>', `${drawingRel}\n</Relationships>`);
+      }
+      zip.file(sheetRelsPath, relsXml);
+    } else {
+      zip.file(sheetRelsPath, [
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
+        drawingRel,
+        '</Relationships>',
+      ].join('\n'));
+    }
+  }
+
+  // 6. [Content_Types].xml — register PNG type and drawing part
+  let ctXml = await zip.file('[Content_Types].xml').async('string');
+  if (!ctXml.includes('Extension="png"')) {
+    ctXml = ctXml.replace(/<Override /, '<Default Extension="png" ContentType="image/png"/><Override ');
+  }
+  if (!ctXml.includes('drawing1.xml')) {
+    ctXml = ctXml.replace('</Types>',
+      '<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/></Types>');
+  }
+  zip.file('[Content_Types].xml', ctXml);
+
+  return zip.generateAsync({ type: 'arraybuffer', compression: 'DEFLATE', compressionOptions: { level: 6 } });
 }
