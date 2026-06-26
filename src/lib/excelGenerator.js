@@ -121,7 +121,7 @@ const COLS = [
   [0,  'Critério',                         10, 'hdrB', 'dPreC',  null,  0, true,  false, false],
   [1,  'Nome do Critério',                 50, 'hdrB', 'dPreL',  null,  2, false, false, false],
   [2,  'Fator de Pontuação',               10, 'hdrB', 'dPreC',  null,  3, false, false, false],
-  [3,  'Unidade',                          14, 'hdrB', 'dPreL',  null,  4, false, false, false],
+  [3,  'Unidade',                          14, 'hdrB', 'dPreC',  null,  4, false, false, false],
   [4,  'Quantidade Máxima de Unidades',    16, 'hdrB', 'dPreC',  null,  5, false, false, false],
   [5,  'Nível',                             8, 'hdrB', 'dPreC',  null,  6, false, false, false],
   [6,  'Diretriz',                         10, 'hdrB', 'dPreC',  null,  7, false, false, false],
@@ -178,19 +178,13 @@ function buildMainSheet(items, dados, criterios, pageMetas) {
   const R_DATA  = 7;  // Data rows begin
 
   // ── Row 0: Brand / Title bar ──────────────────────────────────────────────
-  // [A-C] IFSC brand block — green background for logo image overlay
-  const sIfsc = mkS(C.IFSC_GREEN, C.WHITE, 22, true, 'center', 'center', false, C.GREEN_DK);
-  setCell(ws, R_LOGO, 0, '', 's', sIfsc);
-  for (let c = 1; c <= 2; c++) setCell(ws, R_LOGO, c, '', 's', sIfsc);
-  merge(R_LOGO, 0, R_LOGO, 2);
-
-  // [D-M] Title + subtitle (2-line, wrapText)
+  // [A-O] Barra de título completa — A1:O1 mesclado, logo sobreposta via drawing
   const sTit = mkS(C.DARK_BLUE, C.WHITE, 11, true, 'center', 'center', true, C.DARK_BLUE);
-  setCell(ws, R_LOGO, 3,
+  setCell(ws, R_LOGO, 0,
     'FORMULÁRIO DE AVALIAÇÃO DO RSC — Reconhecimento de Saberes e Competências\nInstituto Federal de Santa Catarina (IFSC)  |  Res. CONSUP nº 29/2014',
     's', sTit);
-  for (let c = 4; c <= NCOL; c++) setCell(ws, R_LOGO, c, '', 's', sTit);
-  merge(R_LOGO, 3, R_LOGO, NCOL);
+  for (let c = 1; c <= NCOL; c++) setCell(ws, R_LOGO, c, '', 's', sTit);
+  merge(R_LOGO, 0, R_LOGO, NCOL);
 
   // ── Row 1: Separator ──────────────────────────────────────────────────────
   fillRow(ws, R_SEP1, NCOL + 1, S.sep);
@@ -687,7 +681,7 @@ function buildMainSheet(items, dados, criterios, pageMetas) {
   ws['!cols'] = COLS.map(([, , wch]) => ({ wch }));
 
   ws['!rows'] = [
-    { hpt: 46 },  // R0  brand block (logo image + title, 2-line)
+    { hpt: 47 },  // R0  brand block (logo image + title, 2-line)
     { hpt:  4 },  // R1  separator
     { hpt: 22 },  // R2  candidate
     { hpt: 22 },  // R3  dates + RT
@@ -768,30 +762,23 @@ export async function generateExcel(items, dados, pageMetas) {
 async function injectLogoIntoXlsx(xlsxBuffer) {
   if (!window.JSZip) return xlsxBuffer;
 
-  // Load logo, convert all opaque pixels to white (same technique as pdfGenerator)
-  let logoPngBytes, natW, natH;
+  let logoPngBytes, natW = 520, natH = 148;
   try {
     await new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
-        natW = img.naturalWidth  || 400;
-        natH = img.naturalHeight || 150;
+        natW = img.naturalWidth  || 520;
+        natH = img.naturalHeight || 148;
         const cv = document.createElement('canvas');
-        cv.width = natW * 2; cv.height = natH * 2;
-        const ctx = cv.getContext('2d');
-        ctx.drawImage(img, 0, 0, cv.width, cv.height);
-        const d = ctx.getImageData(0, 0, cv.width, cv.height);
-        for (let i = 0; i < d.data.length; i += 4) {
-          if (d.data[i + 3] > 10) { d.data[i] = d.data[i + 1] = d.data[i + 2] = 255; }
-        }
-        ctx.putImageData(d, 0, 0);
+        cv.width = natW; cv.height = natH;
+        cv.getContext('2d').drawImage(img, 0, 0, natW, natH);
         cv.toBlob(
           blob => blob.arrayBuffer().then(buf => { logoPngBytes = buf; resolve(); }).catch(reject),
           'image/png'
         );
       };
       img.onerror = reject;
-      img.src = '/logo-ifsc.png';
+      img.src = '/logo-cppd-branca.png';
     });
   } catch {
     return xlsxBuffer;
@@ -803,9 +790,9 @@ async function injectLogoIntoXlsx(xlsxBuffer) {
   zip.file('xl/media/logo.png', logoPngBytes);
 
   // 2. Drawing XML — absoluteAnchor sized to preserve the logo's natural aspect ratio
-  //    Row 0 height = 46pt (set in ws['!rows']); 1pt = 12700 EMU
+  //    Row 0 height = 47pt (set in ws['!rows']); 1pt = 12700 EMU
   const MARGIN   = 70000;                       // ~5.5pt padding on all sides
-  const imgH     = 46 * 12700 - MARGIN * 2;    // 444200 EMU
+  const imgH     = 47 * 12700 - MARGIN * 2;    // 456900 EMU
   const imgW     = Math.round(imgH * (natW / natH));
 
   const drawingXml = [

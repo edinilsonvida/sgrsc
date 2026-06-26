@@ -8,24 +8,23 @@ const bordaCard = [197, 214, 235];
 const labelCor  = [95, 115, 145];
 const textoCor  = [22, 38, 68];
 
+// Garante que qualquer valor chegue ao doc.text() como string segura
+const safeStr = (v) => (v == null || typeof v === 'object') ? '' : String(v);
+
 function drawPageHeader(doc, title, logoWhiteDataUrl, logoNatW, logoNatH) {
   doc.setFillColor(...azulIFSC); doc.rect(0, 0, 210, 22, 'F');
-  const lH = 14, lW = lH * (logoNatW / logoNatH);
+  const lH = 14.3, lW = lH * (logoNatW / logoNatH);
   if (logoWhiteDataUrl) {
-    try { doc.addImage(logoWhiteDataUrl, 'PNG', 5, (22 - lH) / 2, lW, lH); } catch {}
+    try { doc.addImage(logoWhiteDataUrl, 'PNG', 5, (22 - lH) / 2, lW, lH, 'logo-w', 'FAST'); } catch {}
   }
   doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
   doc.text(title, 105, 14, { align: 'center' });
   doc.setFillColor(...verdeIFSC); doc.rect(0, 22, 210, 2.5, 'F');
 }
 
-function drawPageFooter(doc, logoWhiteDataUrl, logoNatW, logoNatH) {
+function drawPageFooter(doc) {
   const fy = 284;
   doc.setFillColor(...azulIFSC); doc.rect(0, fy, 210, 13, 'F');
-  const lH = 9, lW = lH * (logoNatW / logoNatH);
-  if (logoWhiteDataUrl) {
-    try { doc.addImage(logoWhiteDataUrl, 'PNG', 7, fy + 2, lW, lH); } catch {}
-  }
   doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255);
   doc.text('Instituto Federal de Santa Catarina — IFSC  |  www.ifsc.edu.br', 105, fy + 8, { align: 'center' });
 }
@@ -42,41 +41,34 @@ function drawFieldCard(doc, label, value, x, y, w, h) {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9.5);
   doc.setTextColor(...textoCor);
-  const val = (value && value.trim() && value !== 'Não informado' && value !== 'Não informada') ? value : '—';
+  const strVal = (value != null && typeof value !== 'object') ? String(value) : '';
+  const val = (strVal.trim() && strVal !== 'Não informado' && strVal !== 'Não informada') ? strVal : '—';
   const wrapped = doc.splitTextToSize(val, w - 7);
   doc.text(wrapped[0], x + 3.5, y + 13.5);
 }
 
+function rasterizeSvg(src, widthPx) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const h = Math.round(widthPx * (img.naturalHeight || 148) / (img.naturalWidth || 520));
+      const cv = document.createElement('canvas');
+      cv.width = widthPx; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, widthPx, h);
+      resolve({ dataUrl: cv.toDataURL('image/png'), natW: img.naturalWidth || 520, natH: img.naturalHeight || 148 });
+    };
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
 async function getLogoDataUrls() {
-  let logoDataUrl = null, logoWhiteDataUrl = null;
-  let logoNatW = 1, logoNatH = 1;
+  let logoWhiteDataUrl = null, logoNatW = 520, logoNatH = 148;
   try {
-    // Load SVG logo, rasterize to canvas for jsPDF embedding
-    await new Promise(resolve => {
-      const img = new Image();
-      img.onload = () => {
-        logoNatW = img.naturalWidth || 220;
-        logoNatH = img.naturalHeight || 310;
-        // Colored version
-        const cv = document.createElement('canvas');
-        cv.width = logoNatW * 2; cv.height = logoNatH * 2; // 2× for sharpness
-        const ctx = cv.getContext('2d');
-        ctx.drawImage(img, 0, 0, cv.width, cv.height);
-        logoDataUrl = cv.toDataURL('image/png');
-        // White version — force all opaque pixels to white
-        const d = ctx.getImageData(0, 0, cv.width, cv.height);
-        for (let i = 0; i < d.data.length; i += 4) {
-          if (d.data[i + 3] > 10) { d.data[i] = 255; d.data[i+1] = 255; d.data[i+2] = 255; }
-        }
-        ctx.putImageData(d, 0, 0);
-        logoWhiteDataUrl = cv.toDataURL('image/png');
-        resolve();
-      };
-      img.onerror = resolve;
-      img.src = '/logo-ifsc.png';
-    });
+    const r = await rasterizeSvg('/logo-cppd-branca.png', 200);
+    if (r) { logoWhiteDataUrl = r.dataUrl; logoNatW = r.natW; logoNatH = r.natH; }
   } catch { /* logo optional */ }
-  return { logoDataUrl, logoWhiteDataUrl, logoNatW, logoNatH };
+  return { logoWhiteDataUrl, logoNatW, logoNatH };
 }
 
 function buildCapa(jsPDF, dados, logoWhiteDataUrl, logoNatW, logoNatH) {
@@ -86,14 +78,14 @@ function buildCapa(jsPDF, dados, logoWhiteDataUrl, logoNatW, logoNatH) {
           email, celular, rt, portariaRt, dataRt, dataLimite, declaranteNome,
           declaranteSiape, cidade } = dados;
 
-  const logoCapaW = 22;
+  const logoCapaW = 22.4;
   const logoCapaH = logoCapaW * (logoNatH / logoNatW);
   const logoCapaY = (33 - logoCapaH) / 2;
 
   doc.setFillColor(...azulIFSC); doc.rect(0, 0, 210, 33, 'F');
   doc.setFillColor(...verdeIFSC); doc.rect(0, 33, 210, 3.5, 'F');
   if (logoWhiteDataUrl) {
-    try { doc.addImage(logoWhiteDataUrl, 'PNG', 7, logoCapaY, logoCapaW, logoCapaH); } catch {}
+    try { doc.addImage(logoWhiteDataUrl, 'PNG', 7, logoCapaY, logoCapaW, logoCapaH, 'logo-w', 'FAST'); } catch {}
   }
   doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(13.5);
   doc.text('INSTITUTO FEDERAL DE SANTA CATARINA', 105, 17, { align: 'center' });
@@ -169,7 +161,7 @@ function buildCapa(jsPDF, dados, logoWhiteDataUrl, logoNatW, logoNatH) {
   // Date line: Cidade, DD de mês de YYYY
   const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
   const hoje = new Date();
-  const cidadeStr = (cidade && cidade.trim()) ? cidade.trim() : '';
+  const cidadeStr = safeStr(cidade).trim();
   const dataStr = `${cidadeStr ? cidadeStr + ', ' : ''}${hoje.getDate()} de ${meses[hoje.getMonth()]} de ${hoje.getFullYear()}.`;
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(...labelCor);
   doc.text(dataStr, 105, decCards + H + 10, { align: 'center' });
@@ -177,11 +169,6 @@ function buildCapa(jsPDF, dados, logoWhiteDataUrl, logoNatW, logoNatH) {
   // Footer bar fixed at bottom
   const footerY = 284;
   doc.setFillColor(...azulIFSC); doc.rect(0, footerY, 210, 13, 'F');
-  const logoRodapeH = 9;
-  const logoRodapeW = logoRodapeH * (logoNatW / logoNatH);
-  if (logoWhiteDataUrl) {
-    try { doc.addImage(logoWhiteDataUrl, 'PNG', 7, footerY + 2, logoRodapeW, logoRodapeH); } catch {}
-  }
   doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255);
   doc.text('Instituto Federal de Santa Catarina — IFSC  |  www.ifsc.edu.br', 105, footerY + 8, { align: 'center' });
 
@@ -197,23 +184,22 @@ export async function generatePdf(items, dados, onProgress) {
 
   onProgress?.('Carregando logo...');
   const { logoWhiteDataUrl, logoNatW, logoNatH } = await getLogoDataUrls();
-  const logoRodapeH = 11;
+  const logoRodapeH = 11.2;
   const logoRodapeW = logoRodapeH * (logoNatW / logoNatH);
 
   const finalPdf   = await PDFDocument.create();
   const helvetica  = await finalPdf.embedFont(StandardFonts.Helvetica);
 
   onProgress?.('Gerando capa...');
-  const capaDoc  = buildCapa(JPDF, dados, logoWhiteDataUrl, logoNatW, logoNatH);
-  const capaBytes = capaDoc.output('arraybuffer');
-  const capaPdf   = await PDFDocument.load(capaBytes);
+  const capaDoc = buildCapa(JPDF, dados, logoWhiteDataUrl, logoNatW, logoNatH);
+  const capaPdf = await PDFDocument.load(capaDoc.output('arraybuffer'));
 
   // Memorial descritivo
   let decPdf = null;
   if (dados.memorialTexto?.trim()) {
     const decDoc = new JPDF();
     drawPageHeader(decDoc, 'MEMORIAL DESCRITIVO', logoWhiteDataUrl, logoNatW, logoNatH);
-    drawPageFooter(decDoc, logoWhiteDataUrl, logoNatW, logoNatH);
+    drawPageFooter(decDoc);
     decDoc.setFont('helvetica', 'normal'); decDoc.setFontSize(11); decDoc.setTextColor(30, 30, 30);
     const lines = decDoc.splitTextToSize(dados.memorialTexto, 170);
     decDoc.text(lines, 20, 40);
@@ -221,7 +207,7 @@ export async function generatePdf(items, dados, onProgress) {
     // Local, data e assinatura
     const mesesMem = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
     const hojeMem  = new Date();
-    const cidadeMem = (dados.cidade && dados.cidade.trim()) ? dados.cidade.trim() : '';
+    const cidadeMem = safeStr(dados.cidade).trim();
     const dataMem = `${cidadeMem ? cidadeMem + ', ' : ''}${hojeMem.getDate()} de ${mesesMem[hojeMem.getMonth()]} de ${hojeMem.getFullYear()}.`;
     let mY = 40 + lines.length * 6.5 + 28;
     decDoc.text(dataMem, 105, mY, { align: 'center' });
@@ -235,16 +221,16 @@ export async function generatePdf(items, dados, onProgress) {
     decDoc.text('(Gov.br ou ICP-Edu/IFSC)', 105, mY, { align: 'center' });
     mY += 9;
     decDoc.setFont('helvetica', 'bold'); decDoc.setFontSize(11); decDoc.setTextColor(...azulIFSC);
-    decDoc.text(dados.nome || '—', 105, mY, { align: 'center' });
+    decDoc.text(safeStr(dados.nome) || '—', 105, mY, { align: 'center' });
     mY += 6;
     decDoc.setFont('helvetica', 'normal'); decDoc.setFontSize(10); decDoc.setTextColor(30, 30, 30);
-    decDoc.text(`SIAPE nº ${dados.siape || '—'}`, 105, mY, { align: 'center' });
+    decDoc.text(`SIAPE nº ${safeStr(dados.siape) || '—'}`, 105, mY, { align: 'center' });
 
     decPdf = await PDFDocument.load(decDoc.output('arraybuffer'));
   }
 
   onProgress?.('Processando comprovantes...');
-  let currentTotalPages = 1 + (decPdf ? 1 : 0) + 2; // capa + memorial? + declaração + sumário
+  const temDeclarante = !!(safeStr(dados.declaranteNome).trim() || safeStr(dados.declaranteSiape).trim() || safeStr(dados.cidade).trim());
 
   // ── Group items by diretriz, preserving sorted order ──────────────────
   const dirGroups = [];
@@ -296,25 +282,26 @@ export async function generatePdf(items, dados, onProgress) {
 
   const estimateCardH = (d, item) => {
     d.setFont('helvetica', 'bold'); d.setFontSize(9.5);
-    const descLines = d.splitTextToSize(item.docDescricao || '—', TW - 8);
-    const hasObs = !!item.observacao?.trim();
+    const descLines = d.splitTextToSize(String(item.docDescricao || '—'), TW - 8);
+    const hasObs = !!(item.observacao && typeof item.observacao === 'string' && item.observacao.trim());
     d.setFont('helvetica', 'normal'); d.setFontSize(7.5);
-    const obsLines = hasObs ? d.splitTextToSize(item.observacao, TW - 8) : [];
+    const obsLines = hasObs ? d.splitTextToSize(String(item.observacao), TW - 8) : [];
     const contentH = 7.5 + 3.5 + descLines.length * 5.5 + (hasObs ? 2 + obsLines.length * 4 : 0) + 3.5;
     return contentH + 10 + 3;
   };
 
-  const drawItemCard = (d, y, rowNum, item, crit) => {
-    const qty     = item.quantidade || '0';
+  const drawItemCard = (d, y, rowNum, item, crit, pageLabel = null) => {
+    const qty     = String(item.quantidade ?? '0');
     const pts     = (parseFloat(qty) * crit.fator).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const qtyStr  = `${qty} ${pluralUnidade(crit.unidade, qty)}`;
-    const dateStr = item.data ? item.data.split('-').reverse().join('/') : '—';
+    const rawData = (item.data && typeof item.data === 'string') ? item.data : '';
+    const dateStr = rawData ? rawData.split('-').reverse().join('/') : '—';
     const hasObs  = !!item.observacao?.trim();
 
     d.setFont('helvetica', 'bold'); d.setFontSize(9.5);
-    const descLines = d.splitTextToSize(item.docDescricao || '—', TW - 8);
+    const descLines = d.splitTextToSize(String(item.docDescricao || '—'), TW - 8);
     d.setFont('helvetica', 'normal'); d.setFontSize(7.5);
-    const obsLines = hasObs ? d.splitTextToSize(item.observacao, TW - 8) : [];
+    const obsLines = hasObs ? d.splitTextToSize(String(item.observacao || ''), TW - 8) : [];
 
     const topH    = 7.5;
     const descPad = 3.5;
@@ -347,6 +334,12 @@ export async function generatePdf(items, dados, onProgress) {
     d.text('Data:', TX + TW - 33, y + 5.3);
     d.setFont('helvetica', 'bold'); d.setFontSize(7); d.setTextColor(50, 75, 112);
     d.text(dateStr, TX + TW - 3, y + 5.3, { align: 'right' });
+    if (pageLabel) {
+      d.setFont('helvetica', 'normal'); d.setFontSize(6); d.setTextColor(130, 148, 175);
+      d.text('Páginas:', TX + 55, y + 5.3);
+      d.setFont('helvetica', 'bold'); d.setFontSize(6); d.setTextColor(...azulIFSC);
+      d.text(pageLabel, TX + 70, y + 5.3);
+    }
 
     // Description (bold)
     d.setFont('helvetica', 'bold'); d.setFontSize(9.5); d.setTextColor(...textoCor);
@@ -392,101 +385,144 @@ export async function generatePdf(items, dados, onProgress) {
     return totalH + 3;
   };
 
-  // ── One cover page per diretriz group with flowing card layout ─────────
-  const itemMetas  = [];
-  const groupMetas = [];
-
+  // ── Phase 1: Pre-load all files to count pages per item ───────────────
+  const groupPreData = [];
   for (const group of dirGroups) {
-    const hdrTitle = `Diretriz ${group.diretriz}`;
-    const coverDoc = new JPDF();
-    drawPageHeader(coverDoc, hdrTitle, logoWhiteDataUrl, logoNatW, logoNatH);
-    drawPageFooter(coverDoc, logoWhiteDataUrl, logoNatW, logoNatH);
-    const groupStartPage = currentTotalPages + 1;
-    let coverPageCount   = 1;
-    let tableY           = 40;
-
-    // Pre-compute per-criterion stats for the summary strip
     const critStats = {};
     for (const { item, crit } of group.entries) {
       if (!critStats[crit.codigo]) critStats[crit.codigo] = { count: 0, total: 0 };
       critStats[crit.codigo].count++;
       critStats[crit.codigo].total += parseFloat(item.quantidade || '0') * crit.fator;
     }
-
-    let lastCodigo = null, rowNum = 0;
-
-    for (const { item, crit } of group.entries) {
-      rowNum++;
-      if (crit.codigo !== lastCodigo) {
-        if (tableY + 21 > 275) {
-          coverDoc.addPage();
-          drawPageHeader(coverDoc, hdrTitle, logoWhiteDataUrl, logoNatW, logoNatH);
-          drawPageFooter(coverDoc, logoWhiteDataUrl, logoNatW, logoNatH);
-          coverPageCount++; tableY = 40;
-        }
-        const stats = critStats[crit.codigo];
-        tableY += drawCritSubHdr(coverDoc, tableY, crit, stats.count, stats.total);
-        lastCodigo = crit.codigo;
-      }
-      const cardH = estimateCardH(coverDoc, item);
-      if (tableY + cardH - 3 > 275) {
-        coverDoc.addPage();
-        drawPageHeader(coverDoc, hdrTitle, logoWhiteDataUrl, logoNatW, logoNatH);
-        drawPageFooter(coverDoc, logoWhiteDataUrl, logoNatW, logoNatH);
-        coverPageCount++; tableY = 40;
-      }
-      tableY += drawItemCard(coverDoc, tableY, rowNum, item, crit);
-    }
-
-    currentTotalPages += coverPageCount;
-    const coverPdf = await PDFDocument.load(coverDoc.output('arraybuffer'));
-
-    const groupEntries = [];
+    const entriesData = [];
     for (const { item, crit } of group.entries) {
       const loadedFiles = [];
+      let filePageCount = 0;
       for (const file of (item.files || [])) {
         const buffer = await file.arrayBuffer();
         if (file.type === 'application/pdf') {
           const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
-          currentTotalPages += pdfDoc.getPageCount();
+          filePageCount += pdfDoc.getPageCount();
           loadedFiles.push({ type: 'pdf', doc: pdfDoc });
         } else if (file.type.startsWith('image/')) {
           const imgEmbed = file.type === 'image/png'
             ? await finalPdf.embedPng(buffer)
             : await finalPdf.embedJpg(buffer);
-          currentTotalPages++;
+          filePageCount++;
           loadedFiles.push({ type: 'image', img: imgEmbed });
         }
       }
+      entriesData.push({ item, crit, loadedFiles, filePageCount });
+    }
+    groupPreData.push({ group, entries: entriesData, critStats });
+  }
+
+  // ── Phase 2: Simulate sumário page count (mirrors actual loop) ─────────
+  const totalItems = groupPreData.reduce((sum, g) => sum + g.entries.length, 0);
+  let simSumY = 40, sumPageCount = 1;
+  for (let i = 0; i < totalItems; i++) {
+    if (simSumY > 275) { sumPageCount++; simSumY = 40; }
+    simSumY += 16;
+  }
+
+  // ── Phase 3: Simulate cover page count per group ───────────────────────
+  const simDoc = new JPDF();
+  for (const gd of groupPreData) {
+    let coverPageCount = 1, tableY = 40, lastCodigo = null;
+    for (const { item, crit } of gd.entries) {
+      if (crit.codigo !== lastCodigo) {
+        if (tableY + 21 > 275) { coverPageCount++; tableY = 40; }
+        tableY += 21; // drawCritSubHdr always returns 21
+        lastCodigo = crit.codigo;
+      }
+      const cardH = estimateCardH(simDoc, item);
+      if (tableY + cardH - 3 > 275) { coverPageCount++; tableY = 40; }
+      tableY += cardH + 3;
+    }
+    gd.coverPageCount = coverPageCount;
+  }
+
+  // ── Phase 4: Compute exact page numbers for each item's attached files ─
+  let pageCounter = 1 + (decPdf ? 1 : 0) + (temDeclarante ? 1 : 0) + sumPageCount;
+  for (const gd of groupPreData) {
+    pageCounter += gd.coverPageCount;
+    for (const entry of gd.entries) {
+      entry.fileStartPage = entry.filePageCount > 0 ? pageCounter + 1 : null;
+      pageCounter += entry.filePageCount;
+      entry.fileEndPage   = entry.filePageCount > 0 ? pageCounter : null;
+    }
+  }
+
+  // ── Phase 5: Draw cover pages with page labels, build groupMetas ────────
+  const itemMetas  = [];
+  const groupMetas = [];
+
+  for (const { group, entries, critStats } of groupPreData) {
+    const hdrTitle = `Diretriz ${group.diretriz}`;
+    const coverDoc = new JPDF();
+    drawPageHeader(coverDoc, hdrTitle, logoWhiteDataUrl, logoNatW, logoNatH);
+    drawPageFooter(coverDoc);
+    let tableY = 40, lastCodigo = null, rowNum = 0;
+
+    for (const { item, crit, fileStartPage, fileEndPage, filePageCount } of entries) {
+      rowNum++;
+      if (crit.codigo !== lastCodigo) {
+        if (tableY + 21 > 275) {
+          coverDoc.addPage();
+          drawPageHeader(coverDoc, hdrTitle, logoWhiteDataUrl, logoNatW, logoNatH);
+          drawPageFooter(coverDoc);
+          tableY = 40;
+        }
+        const stats = critStats[crit.codigo];
+        tableY += drawCritSubHdr(coverDoc, tableY, crit, stats.count, stats.total);
+        lastCodigo = crit.codigo;
+      }
+      const pageLabel = (filePageCount > 0 && fileStartPage && fileEndPage)
+        ? (fileStartPage === fileEndPage ? `Página ${fileStartPage}` : `Páginas ${fileStartPage}–${fileEndPage}`)
+        : null;
+      const cardH = estimateCardH(coverDoc, item);
+      if (tableY + cardH - 3 > 275) {
+        coverDoc.addPage();
+        drawPageHeader(coverDoc, hdrTitle, logoWhiteDataUrl, logoNatW, logoNatH);
+        drawPageFooter(coverDoc);
+        tableY = 40;
+      }
+      tableY += drawItemCard(coverDoc, tableY, rowNum, item, crit, pageLabel);
+
       itemMetas.push({
         index: itemMetas.length + 1,
         title: `Diretriz ${crit.diretriz} — Critério ${crit.codigo}`,
         docDesc: item.docDescricao,
-        startPage: groupStartPage,
-        endPage: currentTotalPages,
+        startPage: fileStartPage,
+        endPage: fileEndPage,
+        filePageCount,
       });
-      groupEntries.push({ loadedFiles });
     }
-    groupMetas.push({ coverPdf, entries: groupEntries });
+
+    const coverPdf = await PDFDocument.load(coverDoc.output('arraybuffer'));
+    groupMetas.push({ coverPdf, entries: entries.map(e => ({ loadedFiles: e.loadedFiles })) });
   }
 
   // Sumário
   onProgress?.('Gerando sumário...');
   const sumDoc = new JPDF();
   drawPageHeader(sumDoc, 'SUMÁRIO', logoWhiteDataUrl, logoNatW, logoNatH);
-  drawPageFooter(sumDoc, logoWhiteDataUrl, logoNatW, logoNatH);
+  drawPageFooter(sumDoc);
   let sumY = 40;
   for (const meta of itemMetas) {
     if (sumY > 275) {
       sumDoc.addPage();
       drawPageHeader(sumDoc, 'SUMÁRIO', logoWhiteDataUrl, logoNatW, logoNatH);
-      drawPageFooter(sumDoc, logoWhiteDataUrl, logoNatW, logoNatH);
+      drawPageFooter(sumDoc);
       sumY = 40;
     }
-    const pageText = meta.startPage === meta.endPage ? `Pág. ${meta.startPage}` : `Páginas ${meta.startPage} a ${meta.endPage}`;
+    const pageText = !meta.startPage
+      ? 'Sem comprovante'
+      : (meta.startPage === meta.endPage ? `Página ${meta.startPage}` : `Páginas ${meta.startPage} a ${meta.endPage}`);
     sumDoc.setFont('helvetica', 'bold'); sumDoc.setTextColor(30, 30, 30); sumDoc.setFontSize(11);
     sumDoc.text(`Item ${meta.index}: ${meta.title}`, 20, sumY);
-    const td = meta.docDesc?.length > 55 ? meta.docDesc.substring(0, 52) + '...' : meta.docDesc;
+    const rawDesc = (meta.docDesc && typeof meta.docDesc === 'string') ? meta.docDesc : '';
+    const td = rawDesc.length > 55 ? rawDesc.substring(0, 52) + '...' : rawDesc;
     sumDoc.setFont('helvetica', 'normal'); sumDoc.setFontSize(9); sumDoc.setTextColor(100, 100, 100);
     sumDoc.text(td || 'Sem descrição', 20, sumY + 5);
     sumDoc.setFontSize(11); sumDoc.setTextColor(...azulIFSC); sumDoc.setFont('helvetica', 'bold');
@@ -496,11 +532,17 @@ export async function generatePdf(items, dados, onProgress) {
   }
   const sumPdf = await PDFDocument.load(sumDoc.output('arraybuffer'));
 
-  // Declaração de Confere com o Original
+  // Declaração de Confere com o Original — omitida se declarante não preenchido
+  let decSimplesPdf = null;
+  if (!temDeclarante) {
+    // skip
+  } else {
   const decDocSimples = new JPDF();
   drawPageHeader(decDocSimples, 'DECLARAÇÃO DE CONFERE COM O ORIGINAL', logoWhiteDataUrl, logoNatW, logoNatH);
-  drawPageFooter(decDocSimples, logoWhiteDataUrl, logoNatW, logoNatH);
-  const { nome, siape, declaranteNome, declaranteSiape, cidade, nivelPretendido, dataLimite } = dados;
+  drawPageFooter(decDocSimples);
+  const declaranteNome   = safeStr(dados.declaranteNome);
+  const declaranteSiape  = safeStr(dados.declaranteSiape);
+  const cidade           = safeStr(dados.cidade);
 
   decDocSimples.setFont('helvetica', 'normal'); decDocSimples.setFontSize(11); decDocSimples.setTextColor(30, 30, 30);
 
@@ -519,7 +561,7 @@ export async function generatePdf(items, dados, onProgress) {
   // Local e data
   const mesesDec = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
   const hojeDec  = new Date();
-  const cidadeDec = (cidade && cidade.trim()) ? cidade.trim() : '';
+  const cidadeDec = cidade.trim();
   const dataDec = `${cidadeDec ? cidadeDec + ', ' : ''}${hojeDec.getDate()} de ${mesesDec[hojeDec.getMonth()]} de ${hojeDec.getFullYear()}.`;
   decDocSimples.text(dataDec, 105, dY, { align: 'center' });
   dY += 37;
@@ -539,6 +581,7 @@ export async function generatePdf(items, dados, onProgress) {
   decDocSimples.setFont('helvetica', 'normal'); decDocSimples.setFontSize(10); decDocSimples.setTextColor(30, 30, 30);
   decDocSimples.text(`SIAPE nº ${declaranteSiape || '—'}`, 105, dY, { align: 'center' });
 
+
   // Nota informativa (caixa cinza acima do rodapé)
   const noteText = 'Deve-se providenciar a juntada de toda a documentação, inclusive da presente declaração, em um único arquivo no formato PDF. Somente após essa unificação o documento deverá ser assinado digitalmente pelo DECLARANTE (servidor responsável pela conferência). Consideram-se válidas assinaturas digitais que possam ser verificadas em plataformas reconhecidas, tais como ICPEdu/IFSC ou portal Gov.br.';
   decDocSimples.setFont('helvetica', 'normal'); decDocSimples.setFontSize(7.5); decDocSimples.setTextColor(70, 85, 110);
@@ -549,7 +592,8 @@ export async function generatePdf(items, dados, onProgress) {
   decDocSimples.roundedRect(15, noteY, 180, noteH, 2, 2, 'FD');
   decDocSimples.text(noteLines, 18.5, noteY + 5);
 
-  const decSimplesPdf = await PDFDocument.load(decDocSimples.output('arraybuffer'));
+  decSimplesPdf = await PDFDocument.load(decDocSimples.output('arraybuffer'));
+  } // end if temDeclarante
 
   // Merge
   onProgress?.('Unificando PDF...');
@@ -560,7 +604,7 @@ export async function generatePdf(items, dados, onProgress) {
   };
   await addPages(capaPdf);
   if (decPdf) await addPages(decPdf);
-  await addPages(decSimplesPdf);
+  if (decSimplesPdf) await addPages(decSimplesPdf);
   await addPages(sumPdf);
   for (const group of groupMetas) {
     await addPages(group.coverPdf);
@@ -578,13 +622,16 @@ export async function generatePdf(items, dados, onProgress) {
   }
 
   // Capa de encerramento
+  const nome            = safeStr(dados.nome);
+  const siape           = safeStr(dados.siape);
+  const nivelPretendido = safeStr(dados.nivelPretendido);
   const endDoc = new JPDF();
   endDoc.setFillColor(...azulIFSC); endDoc.rect(0, 0, 210, 297, 'F');
   endDoc.setFillColor(...verdeIFSC); endDoc.rect(205, 0, 5, 297, 'F');
   endDoc.setFillColor(28, 124, 59); endDoc.rect(0, 0, 205, 3, 'F');
   if (logoWhiteDataUrl) {
-    const elW = 43; const elH = elW * (logoNatH / logoNatW);
-    try { endDoc.addImage(logoWhiteDataUrl, 'PNG', 105 - elW / 2, 22, elW, elH); } catch {}
+    const elW = 63.2; const elH = elW * (logoNatH / logoNatW);
+    try { endDoc.addImage(logoWhiteDataUrl, 'PNG', 105 - elW / 2, 22, elW, elH, 'logo-w', 'FAST'); } catch {}
   }
   endDoc.setDrawColor(255, 255, 255); endDoc.setLineWidth(0.4); endDoc.line(40, 78, 170, 78);
   endDoc.setFont('helvetica', 'bold'); endDoc.setFontSize(36); endDoc.setTextColor(255, 255, 255);

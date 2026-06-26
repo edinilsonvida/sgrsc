@@ -93,7 +93,14 @@ export default function App() {
   }, [dados, items, user, dataLoaded]);
 
   const CAMPOS_OBRIGATORIOS = ['nome', 'siape', 'nivelPretendido', 'email', 'celular', 'dataLimite'];
-  const dadosValidos = () => CAMPOS_OBRIGATORIOS.every(f => dados[f]?.trim?.() || dados[f]);
+  const dadosValidos = () => {
+    if (!CAMPOS_OBRIGATORIOS.every(f => dados[f]?.trim?.() || dados[f])) return false;
+    if (dados.rt && dados.rt !== 'Nenhuma') {
+      if (!dados.portariaRt?.trim()) return false;
+      if (!dados.dataRt) return false;
+    }
+    return true;
+  };
 
   const handleDadosChange = (field, value) => setDados(prev => ({ ...prev, [field]: value }));
 

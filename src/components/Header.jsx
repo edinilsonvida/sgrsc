@@ -12,9 +12,9 @@ export default function Header({ onExport, onImport, onClear }) {
         <div className="d-flex align-items-center flex-wrap py-3" style={{ gap: '0 16px', minHeight: 72 }}>
           <div className="d-flex align-items-center" style={{ gap: 14 }}>
             <img
-              src="/logo-ifsc.png"
-              alt="Logo IFSC"
-              style={{ height: 48, filter: 'brightness(0) invert(1)', flexShrink: 0 }}
+              src="/logo-cppd.png"
+              alt="Logo IFSC CPPD"
+              style={{ height: 45, filter: 'brightness(0) invert(1)', flexShrink: 0 }}
             />
             <div className="d-none d-sm-block" style={{ width: 1, height: 42, background: 'rgba(255,255,255,0.22)' }} />
           </div>

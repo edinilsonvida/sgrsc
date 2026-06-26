@@ -3,6 +3,15 @@ import flatpickr from 'flatpickr';
 import { Portuguese } from 'flatpickr/dist/l10n/pt.js';
 import { getCriterio, calcularPontosItem, getQuantidadeMaxima } from '../lib/engine';
 import { pluralUnidade } from '../lib/pluralUnidade';
+import Tooltip from './Tooltip';
+
+const TIPS = {
+  docDescricao: 'Descreva objetivamente o documento (ex.: "Certificado de 40h em Libras — IFSC, 2023"). Esta descrição aparece no sumário e nas fichas do PDF.',
+  data:         'Data de conclusão, emissão ou publicação do documento comprobatório.',
+  quantidade:   'Quantidade comprovada neste documento (horas, meses, páginas etc.). Não pode exceder o limite máximo estabelecido pelo critério.',
+  observacao:   'Campo opcional para anotações: número de processo, ressalvas ou informações complementares ao documento.',
+  arquivos:     'Anexe o PDF ou imagem do comprobatório. Todos os arquivos serão incorporados ao PDF final do memorial, nas páginas indicadas no sumário.',
+};
 
 function isoToDisplay(iso) {
   if (!iso) return '';
@@ -117,7 +126,10 @@ export default function ItemCard({ item, index, onUpdate, onRemove, onDuplicate,
           <div className="row">
             <div className="col-12 mb-3">
               <div className="br-input">
-                <label>Descrição do documento <span style={{ color: '#c0392b' }}>*</span></label>
+                <label>
+                  Descrição do documento <span style={{ color: '#c0392b' }}>*</span>
+                  <Tooltip text={TIPS.docDescricao} />
+                </label>
                 <input type="text" value={item.docDescricao || ''} onChange={e => onUpdate(item.id, 'docDescricao', e.target.value)} placeholder="Descreva o documento comprobatório"
                   style={errDesc ? errStyle : undefined} />
                 {errDesc && errMsg}
@@ -126,7 +138,10 @@ export default function ItemCard({ item, index, onUpdate, onRemove, onDuplicate,
 
             <div className="col-sm-4 mb-3">
               <div data-dtp="1" className="br-input has-icon">
-                <label htmlFor={`dataItem_${item.id}`}>Data <span style={{ color: '#c0392b' }}>*</span></label>
+                <label htmlFor={`dataItem_${item.id}`}>
+                  Data <span style={{ color: '#c0392b' }}>*</span>
+                  <Tooltip text={TIPS.data} />
+                </label>
                 <input id={`dataItem_${item.id}`} ref={dtpRef} type="text" placeholder="dd/mm/aaaa" defaultValue={isoToDisplay(item.data)} autoComplete="off"
                   style={errData ? errStyle : undefined} />
                 <button data-cal="1" className="br-button circle small" type="button" aria-label="Abrir calendário">
@@ -145,7 +160,10 @@ export default function ItemCard({ item, index, onUpdate, onRemove, onDuplicate,
 
             <div className="col-sm-4 mb-3">
               <div className="br-input">
-                <label>Quantidade <span style={{ color: '#c0392b' }}>*</span></label>
+                <label>
+                  Quantidade <span style={{ color: '#c0392b' }}>*</span>
+                  <Tooltip text={TIPS.quantidade} />
+                </label>
                 <input type="number" step="0.01" min="0" max={crit?.quantidadeMaxima}
                   value={item.quantidade || ''} onChange={e => handleQtd(e.target.value)} placeholder="0"
                   style={errQtd ? errStyle : undefined} />
@@ -160,7 +178,10 @@ export default function ItemCard({ item, index, onUpdate, onRemove, onDuplicate,
 
             <div className="col-12 mb-3">
               <div className="br-input">
-                <label>Observação <span style={{ fontSize: '0.78rem', color: '#8a9ab5' }}>(opcional)</span></label>
+                <label>
+                  Observação <span style={{ fontSize: '0.78rem', color: '#8a9ab5' }}>(opcional)</span>
+                  <Tooltip text={TIPS.observacao} />
+                </label>
                 <textarea rows="2" value={item.observacao || ''} onChange={e => onUpdate(item.id, 'observacao', e.target.value)} placeholder="Anotações adicionais..." />
               </div>
             </div>
@@ -169,7 +190,9 @@ export default function ItemCard({ item, index, onUpdate, onRemove, onDuplicate,
           {/* Anexos */}
           <div style={{ background: '#f4f7fb', borderRadius: 8, padding: '12px 14px', border: `1px solid ${item.files?.length > 0 ? '#dce6f5' : '#e74c3c'}`, marginTop: 4 }}>
             <div style={{ fontWeight: 600, fontSize: '0.83rem', color: '#1a2e50', marginBottom: 8 }}>
-              <i className="fas fa-paperclip" style={{ color: '#1351b4', marginRight: 6 }} />Arquivos anexados <span style={{ color: '#c0392b' }}>*</span>
+              <i className="fas fa-paperclip" style={{ color: '#1351b4', marginRight: 6 }} />
+              Arquivos anexados <span style={{ color: '#c0392b' }}>*</span>
+              <Tooltip text={TIPS.arquivos} />
             </div>
 
             {(!item.files || item.files.length === 0) && (

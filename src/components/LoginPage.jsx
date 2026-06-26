@@ -20,8 +20,25 @@ export default function LoginPage() {
     try {
       await signIn();
     } catch (err) {
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setError('Não foi possível entrar. Verifique os pop-ups e tente novamente.');
+      const msgs = {
+        'auth/popup-blocked':
+          'O pop-up foi bloqueado pelo navegador. Clique no ícone de pop-up bloqueado na barra de endereço e permita para este site.',
+        'auth/popup-closed-by-user': '',
+        'auth/cancelled-popup-request': '',
+        'auth/unauthorized-domain':
+          'Este domínio não está autorizado no Firebase. Acesse o Firebase Console → Authentication → Settings → Authorized domains e adicione o domínio atual.',
+        'auth/operation-not-allowed':
+          'O login com Google não está ativado. Acesse o Firebase Console → Authentication → Sign-in method e ative o Google.',
+        'auth/network-request-failed':
+          'Sem conexão com a internet. Verifique sua rede e tente novamente.',
+        'auth/internal-error':
+          'Erro interno do Firebase. Verifique se o domínio está na lista de domínios autorizados no Firebase Console.',
+      };
+      const msg = msgs[err.code];
+      if (msg === undefined) {
+        setError(`Erro ao entrar (${err.code || 'desconhecido'}). Tente novamente.`);
+      } else if (msg) {
+        setError(msg);
       }
     } finally {
       setLoading(false);
@@ -34,7 +51,7 @@ export default function LoginPage() {
       {/* Header */}
       <header style={{ borderBottom: '3px solid #1C7C3B', padding: '16px 0' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <img src="/logo-ifsc.png" alt="Logo IFSC" style={{ height: 42, filter: 'brightness(0) invert(1)', flexShrink: 0 }} />
+          <img src="/logo-cppd.png" alt="Logo IFSC CPPD" style={{ height: 41, filter: 'brightness(0) invert(1)', flexShrink: 0 }} />
           <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.2)' }} />
           <div>
             <div style={{ color: '#fff', fontWeight: 700, fontSize: '1rem' }}>SGRSC — Sistema de Geração de Memorial RSC</div>

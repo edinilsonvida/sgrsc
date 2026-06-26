@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
 import { getDiretrizes, filtrarItens } from '../lib/engine';
+import Tooltip from './Tooltip';
+
+const TIPS = {
+  nivel:    'Filtre por nível RSC para exibir apenas os critérios aplicáveis ao nível que você pleiteia (RSC I, II ou III).',
+  diretriz: 'Filtre por diretriz para localizar mais rapidamente o critério desejado dentro do nível selecionado.',
+  criterio: 'Selecione o critério que melhor descreve o documento a ser comprovado. Cada critério possui fator de pontuação e unidade definidos pela Resolução Consup nº 29/2014.',
+};
 
 export default function ItemAdder({ onAdd }) {
   const [nivel, setNivel]     = useState('');
@@ -43,7 +50,10 @@ export default function ItemAdder({ onAdd }) {
         <div className="row">
           <div className="col-sm-6 mb-3">
             <div className="br-input">
-              <label>Filtrar por nível</label>
+              <label>
+                Filtrar por nível
+                <Tooltip text={TIPS.nivel} />
+              </label>
               <select value={nivel} onChange={e => setNivel(e.target.value)}>
                 <option value="">Todos os níveis</option>
                 <option>RSC I</option><option>RSC II</option><option>RSC III</option>
@@ -52,7 +62,10 @@ export default function ItemAdder({ onAdd }) {
           </div>
           <div className="col-sm-6 mb-3">
             <div className="br-input">
-              <label>Filtrar por diretriz</label>
+              <label>
+                Filtrar por diretriz
+                <Tooltip text={TIPS.diretriz} />
+              </label>
               <select value={diretriz} onChange={e => setDir(e.target.value)}>
                 <option value="">Todas as diretrizes</option>
                 {diretrizes.map(d => <option key={d} value={d}>Diretriz {d}</option>)}
@@ -61,7 +74,10 @@ export default function ItemAdder({ onAdd }) {
           </div>
           <div className="col-12 mb-3">
             <div className={`br-input${erro ? ' danger' : ''}`}>
-              <label>Selecione o critério <span className="text-danger">*</span></label>
+              <label>
+                Selecione o critério <span className="text-danger">*</span>
+                <Tooltip text={TIPS.criterio} />
+              </label>
               <select
                 value={criterio}
                 onChange={e => { setCrit(e.target.value); if (e.target.value) setErro(''); }}

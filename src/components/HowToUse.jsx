@@ -1,7 +1,7 @@
 const STEPS = [
   { icon: 'fa-user',         label: 'Passo 1', desc: 'Preencha a identificação do servidor', green: false },
   { icon: 'fa-filter',       label: 'Passo 2', desc: 'Filtre por nível e diretriz',           green: false },
-  { icon: 'fa-list-ul',      label: 'Passo 3', desc: 'Selecione o critério e clique em Adicionar', green: false },
+  { icon: 'fa-list-ul',      label: 'Passo 3', desc: 'Selecione o critério e clique em "Adicionar"', green: false },
   { icon: 'fa-hashtag',      label: 'Passo 4', desc: 'Informe a quantidade e anexe o PDF comprobatório', green: false },
   { icon: 'fa-redo',         label: 'Passo 5', desc: 'Repita os passos 2–4 para cada comprovante', green: false },
   { icon: 'fa-file-download',label: 'Passo 6', desc: 'Gere a planilha (ODS) e o PDF final',   green: true },
