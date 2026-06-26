@@ -3,6 +3,7 @@ import Header             from './components/Header';
 import Footer             from './components/Footer';
 import LibErrorBanner     from './components/LibErrorBanner';
 import AlertBanner        from './components/AlertBanner';
+import JsonInfoBanner     from './components/JsonInfoBanner';
 import HowToUse          from './components/HowToUse';
 import IdentificationForm from './components/IdentificationForm';
 import ItemAdder          from './components/ItemAdder';
@@ -271,6 +272,7 @@ export default function App() {
 
       <div className="container-lg mb-5 mt-4">
         <AlertBanner />
+        <JsonInfoBanner />
         <HowToUse />
 
         <div className="d-flex justify-content-end mb-4" style={{ gap: 10 }}>
